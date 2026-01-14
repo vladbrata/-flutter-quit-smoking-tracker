@@ -42,23 +42,27 @@ class _CounterPageState extends State<CounterPage> {
     );
 
     if (result != null) {
+      DateTime now = DateTime.now();
       setState(() {
         // Calculăm costul zilnic (Preț pachet * Pachete pe zi)
         _dailyCost = result['price']! * result['packs']!;
-
         // Calculăm cât economisești la fiecare secundă
-        // (Cost zilnic împărțit la 86400 secunde dintr-o zi)
         _costPerSecunda = _dailyCost / 86400;
-
         _isStarted = true;
+        // Resetăm timpul
+        _secundeScurse = 0;
+        _baniEconomisiti = 0.0;
       });
 
+      // Salvăm configurația și timpul de start
+      _saveQuitData(now, _dailyCost);
       // După ce avem datele, pornim cronometrul
       _startTimer();
     }
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _secundeScurse++;
@@ -146,36 +150,35 @@ class _CounterPageState extends State<CounterPage> {
     );
   }
 
-  void _saveStartTime() async {
+  void _saveQuitData(DateTime startTime, double dailyCost) async {
     final prefs = await SharedPreferences.getInstance();
     // Salvăm data actuală ca string (format ISO 8601)
-    await prefs.setString('start_time', DateTime.now().toIso8601String());
-    // await prefs.setDouble(
-    //   'saved_daily_cost',
-    //   _baniEconomisiti,
-    // ); // Salvăm și costul calculat
+    await prefs.setString('start_time', startTime.toIso8601String());
+    await prefs.setDouble('daily_cost', dailyCost);
   }
 
   void _loadSavedData() async {
     final prefs = await SharedPreferences.getInstance();
     String? startTimeStr = prefs.getString('start_time');
-    double? savedCost = prefs.getDouble('saved_daily_cost');
+    double? savedDailyCost = prefs.getDouble('daily_cost');
 
-    if (startTimeStr != null && savedCost != null) {
+    if (startTimeStr != null && savedDailyCost != null) {
       setState(() {
         DateTime startTime = DateTime.parse(startTimeStr);
-        _dailyCost = savedCost;
+        _dailyCost = savedDailyCost;
         _costPerSecunda = _dailyCost / 86400;
 
         // Calculăm secundele scurse de atunci până ACUM
         _secundeScurse = DateTime.now().difference(startTime).inSeconds;
+        // Recalculăm banii economisiți pe baza timpului scurs
+        _baniEconomisiti = _secundeScurse * _costPerSecunda;
+
         _isStarted = true;
       });
       _startTimer();
     } else {
       // Dacă nu avem date, arătăm dialogul de întrebări
       _showSetupDialog();
-      _saveStartTime();
     }
   }
 
@@ -183,11 +186,9 @@ class _CounterPageState extends State<CounterPage> {
     // Obținem instanța SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
-    // Ștergem data de start
+    // Ștergem datele
     await prefs.remove('start_time');
-
-    // Opțional: Ștergem și restul datelor salvate dacă vrei un reset complet
-    // await prefs.remove('saved_daily_cost');
+    await prefs.remove('daily_cost');
 
     setState(() {
       _timer?.cancel(); // Oprim cronometrul actual
