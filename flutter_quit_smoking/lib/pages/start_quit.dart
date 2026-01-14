@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/counter_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StartQuit extends StatelessWidget {
@@ -30,7 +31,12 @@ class StartQuit extends StatelessWidget {
                 minimumSize: const Size(300, 70),
                 backgroundColor: const Color.fromARGB(255, 168, 10, 10),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => CounterPage()),
+                );
+              },
               child: Text(
                 'Quit',
                 style: TextStyle(
