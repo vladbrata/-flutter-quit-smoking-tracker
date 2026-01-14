@@ -27,30 +27,30 @@ class StartQuit extends StatelessWidget {
             ),
             SizedBox(height: 5.0),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(300, 70),
-                backgroundColor: const Color.fromARGB(255, 168, 10, 10),
-              ),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => CounterPage()),
                 );
               },
-              child: Text(
-                'Quit',
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B0000), // Roșu închis
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 50,
+                  vertical: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 8,
+              ),
+              child: const Text(
+                "START QUITTING",
                 style: TextStyle(
-                  fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
-                  fontSize: 60.0,
-                  color: Colors.white,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black,
-                      offset: const Offset(0, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
+                  letterSpacing: 1.2,
                 ),
               ),
             ),

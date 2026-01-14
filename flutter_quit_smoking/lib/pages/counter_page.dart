@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/pages/widgets/question_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CounterPage extends StatefulWidget {
   const CounterPage({super.key});
@@ -25,9 +27,10 @@ class _CounterPageState extends State<CounterPage> {
   void initState() {
     super.initState();
     // Deschide dialogul imediat ce se încarcă pagina
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showSetupDialog();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _showSetupDialog();
+    // });
+    _loadSavedData();
   }
 
   // Funcția care gestionează Dialogul și primirea datelor
@@ -91,6 +94,7 @@ class _CounterPageState extends State<CounterPage> {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const Spacer(),
                     const Text(
                       "TIMP FĂRĂ FUMAT",
                       style: TextStyle(color: Colors.white70, letterSpacing: 2),
@@ -123,11 +127,79 @@ class _CounterPageState extends State<CounterPage> {
                         ],
                       ),
                     ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () {
+                        _resetProgression();
+                      },
+                      child: const Text(
+                        'I have smoked :(',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 )
               : const CircularProgressIndicator(color: Colors.red),
         ),
       ),
+    );
+  }
+
+  void _saveStartTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Salvăm data actuală ca string (format ISO 8601)
+    await prefs.setString('start_time', DateTime.now().toIso8601String());
+    // await prefs.setDouble(
+    //   'saved_daily_cost',
+    //   _baniEconomisiti,
+    // ); // Salvăm și costul calculat
+  }
+
+  void _loadSavedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? startTimeStr = prefs.getString('start_time');
+    double? savedCost = prefs.getDouble('saved_daily_cost');
+
+    if (startTimeStr != null && savedCost != null) {
+      setState(() {
+        DateTime startTime = DateTime.parse(startTimeStr);
+        _dailyCost = savedCost;
+        _costPerSecunda = _dailyCost / 86400;
+
+        // Calculăm secundele scurse de atunci până ACUM
+        _secundeScurse = DateTime.now().difference(startTime).inSeconds;
+        _isStarted = true;
+      });
+      _startTimer();
+    } else {
+      // Dacă nu avem date, arătăm dialogul de întrebări
+      _showSetupDialog();
+      _saveStartTime();
+    }
+  }
+
+  void _resetProgression() async {
+    // Obținem instanța SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+
+    // Ștergem data de start
+    await prefs.remove('start_time');
+
+    // Opțional: Ștergem și restul datelor salvate dacă vrei un reset complet
+    // await prefs.remove('saved_daily_cost');
+
+    setState(() {
+      _timer?.cancel(); // Oprim cronometrul actual
+      _secundeScurse = 0; // Resetăm timpul vizual
+      _isStarted = false; // Ne întoarcem la starea de dinainte de configurare
+      _baniEconomisiti = 0;
+    });
+
+    // Redeschidem dialogul pentru ca utilizatorul să poată reîncepe procesul
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const StartQuit()),
     );
   }
 }
