@@ -1,8 +1,12 @@
 import 'dart:async';
-import 'dart:ffi';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/goals_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
+import 'package:flutter_quit_smoking/widgets/add_goal_widget_dialog.dart';
+import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
+import 'package:flutter_quit_smoking/widgets/mini_goal_widget.dart';
 import 'package:flutter_quit_smoking/widgets/question_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +24,7 @@ class _CounterPageState extends State<CounterPage> {
   double _dailyCost = 0.0;
   double _baniEconomisiti = 0.0;
   double _costPerSecunda = 0.0;
+  Goal? _selectedGoal;
 
   // Flag pentru a știi când să afișăm cronometrul
   bool _isStarted = false;
@@ -93,25 +98,137 @@ class _CounterPageState extends State<CounterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black, // Fundalul negru cerut
+      drawer: Drawer(
+        child: Container(
+          color: const Color(0xFF121212), // Fundal închis pentru meniu
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // Header-ul Drawer-ului (poți pune numele lui Lety aici)
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8B0000), // Roșu închis
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    Icon(Icons.smoke_free, color: Colors.white, size: 40),
+                    SizedBox(height: 10),
+                    Text(
+                      "Meniu Setări",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Opțiunea 2: Resetare Progres
+              ListTile(
+                leading: const Icon(
+                  Icons.attach_money_sharp,
+                  color: Colors.grey,
+                ),
+                title: const Text(
+                  "My Financial Goals",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GoalsPage()),
+                  );
+                },
+              ),
+
+              const Divider(color: Colors.white10), // Linie despărțitoare
+              // Opțiunea 3: Ieșire
+              ListTile(
+                leading: const Icon(Icons.exit_to_app, color: Colors.white38),
+                title: const Text(
+                  "Închide",
+                  style: TextStyle(color: Colors.white38),
+                ),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // Flutter va adăuga automat iconița de meniu (hamburger icon)
+        // în stânga dacă ai un drawer definit.
+      ),
       body: SafeArea(
         child: Center(
           child: _isStarted
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GoalsPage()),
-                        );
-                      },
-                      child: const Text(
-                        'Add goal',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const Spacer(),
+                    _selectedGoal == null
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              final result = await showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    const AddGoalWidgetDialog(),
+                              );
+                              if (result != null && result is Goal) {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  'selected_goal',
+                                  jsonEncode(result.toMap()),
+                                );
+                                setState(() {
+                                  _selectedGoal = result;
+                                });
+                              }
+                            },
+                            child: const Text(
+                              'Add goal widget',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        : InkWell(
+                            onTap: () async {
+                              final result = await showDialog(
+                                context: context,
+                                builder: (context) => AddGoalWidgetDialog(
+                                  selectedGoal: _selectedGoal,
+                                ),
+                              );
+                              if (result == 'CLEAR') {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('selected_goal');
+                                setState(() {
+                                  _selectedGoal = null;
+                                });
+                              } else if (result != null && result is Goal) {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  'selected_goal',
+                                  jsonEncode(result.toMap()),
+                                );
+                                setState(() {
+                                  _selectedGoal = result;
+                                });
+                              }
+                            },
+                            child: MiniGoalWidget(
+                              goal: _selectedGoal!,
+                              currentSavings: _baniEconomisiti,
+                            ),
+                          ),
+                    const SizedBox(height: 190),
                     const Text(
                       "TIMP FĂRĂ FUMAT",
                       style: TextStyle(color: Colors.white70, letterSpacing: 2),
@@ -174,6 +291,11 @@ class _CounterPageState extends State<CounterPage> {
     final prefs = await SharedPreferences.getInstance();
     String? startTimeStr = prefs.getString('start_time');
     double? savedDailyCost = prefs.getDouble('daily_cost');
+    String? savedGoalStr = prefs.getString('selected_goal');
+
+    if (savedGoalStr != null) {
+      _selectedGoal = Goal.fromMap(jsonDecode(savedGoalStr));
+    }
 
     if (startTimeStr != null && savedDailyCost != null) {
       setState(() {
@@ -204,6 +326,7 @@ class _CounterPageState extends State<CounterPage> {
     // Ștergem datele
     await prefs.remove('start_time');
     await prefs.remove('daily_cost');
+    await prefs.remove('selected_goal');
 
     setState(() {
       _timer?.cancel(); // Oprim cronometrul actual

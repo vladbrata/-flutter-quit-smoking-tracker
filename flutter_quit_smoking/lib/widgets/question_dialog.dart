@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/counter_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionDialog extends StatefulWidget {
@@ -9,6 +10,20 @@ class QuestionDialog extends StatefulWidget {
 }
 
 class _QuestionDialogState extends State<QuestionDialog> {
+  void _finishSetup() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('startedQuitting', true);
+    await prefs.setString('start_date', DateTime.now().toIso8601String());
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const CounterPage()),
+      );
+    }
+  }
+
   // Variabilele se declară aici
   String inputPrice = "";
   String inputPacks = "";
@@ -36,6 +51,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
       actions: [
         TextButton(
           onPressed: () {
+            _finishSetup();
             // Trimitem datele înapoi ca o Listă sau un Map
             Navigator.pop(context, {
               'price': double.tryParse(inputPrice) ?? 0.0,
