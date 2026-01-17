@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/goals_page.dart';
+import 'package:flutter_quit_smoking/pages/roadmap_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/widgets/add_goal_widget_dialog.dart';
 import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
@@ -127,7 +128,6 @@ class _CounterPageState extends State<CounterPage> {
                 ),
               ),
 
-              // Opțiunea 2: Resetare Progres
               ListTile(
                 leading: const Icon(
                   Icons.attach_money_sharp,
@@ -143,6 +143,23 @@ class _CounterPageState extends State<CounterPage> {
                     MaterialPageRoute(builder: (context) => GoalsPage()),
                   );
                   _verifySelectedGoal();
+                },
+              ),
+
+              // Opțiunea: Roadmap
+              ListTile(
+                leading: const Icon(Icons.timeline, color: Colors.grey),
+                title: const Text(
+                  "Journey Roadmap",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RoadmapPage(),
+                    ),
+                  );
                 },
               ),
 
