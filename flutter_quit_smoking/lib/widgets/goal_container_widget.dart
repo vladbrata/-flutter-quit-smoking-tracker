@@ -20,14 +20,22 @@ class GoalContainer extends StatefulWidget {
 class _GoalContainerState extends State<GoalContainer> {
   @override
   Widget build(BuildContext context) {
-    // Calculăm progresul: o valoare între 0.0 și 1.0
-    // Folosim .clamp pentru a ne asigura că nu depășește 100% dacă economiile sunt mai mari decât prețul
-    double progressValue = 0.0;
+    // 1. Determinăm rata de schimb (Hardcoded pentru moment)
+    double exchangeRate = 1.0;
+    if (widget.goal.currency == 'EUR') {
+      exchangeRate = 4.97;
+    } else if (widget.goal.currency == 'USD') {
+      exchangeRate = 4.60;
+    }
 
-    // Convertim prețul din String în double dacă modelul tău îl ține ca String
+    // 2. Convertim economiile (care sunt în RON) în moneda goal-ului
+    double savingsInGoalCurrency = widget.currentSavings / exchangeRate;
+
+    // 3. Parsăm prețul goal-ului
     double goalPrice = double.tryParse(widget.goal.price) ?? 1.0;
-    progressValue = (widget.currentSavings / goalPrice).clamp(0.0, 1.0);
 
+    // 4. Calculăm progresul
+    double progressValue = (savingsInGoalCurrency / goalPrice).clamp(0.0, 1.0);
     int percentage = (progressValue * 100).toInt();
 
     return Container(
@@ -122,7 +130,7 @@ class _GoalContainerState extends State<GoalContainer> {
                     ),
                   ),
                   Text(
-                    "${widget.currentSavings.toStringAsFixed(2)} / ${widget.goal.price} ${widget.goal.currency}",
+                    "${savingsInGoalCurrency.toStringAsFixed(2)} / ${widget.goal.price} ${widget.goal.currency}",
                     style: const TextStyle(color: Colors.white38, fontSize: 11),
                   ),
                 ],
