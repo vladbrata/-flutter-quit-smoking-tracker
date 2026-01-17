@@ -101,7 +101,7 @@ class _CounterPageState extends State<CounterPage> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => GoalsPage()),
                         );
@@ -184,7 +184,9 @@ class _CounterPageState extends State<CounterPage> {
         // Calculăm secundele scurse de atunci până ACUM
         _secundeScurse = DateTime.now().difference(startTime).inSeconds;
         // Recalculăm banii economisiți pe baza timpului scurs
-        _baniEconomisiti = _secundeScurse * _costPerSecunda;
+        setState(() {
+          _baniEconomisiti = _secundeScurse * _costPerSecunda;
+        });
 
         _isStarted = true;
       });

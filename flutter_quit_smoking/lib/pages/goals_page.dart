@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_quit_smoking/widgets/add_goals_question_dialog.dart';
 import 'package:flutter_quit_smoking/widgets/goal_container_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
+import "package:flutter_quit_smoking/pages/counter_page.dart";
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GoalsPage extends StatefulWidget {
   GoalsPage({Key? key}) : super(key: key);
@@ -14,43 +17,43 @@ class GoalsPage extends StatefulWidget {
 }
 
 class _GoalsPageState extends State<GoalsPage> {
+  double _baniEconomisiti = 0.0;
+  Timer? _timer;
+  DateTime? _startTime;
+  double _costPerSecond = 0;
   List<Goal> myGoals = [];
   int numOfGoals = 0;
   bool _isLoading = true;
 
   void initState() {
     super.initState();
-    _loadGoals(); // Citim valoarea imediat ce se deschide pagina
+    _loadGoals();
+    _loadQuitData();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Obiectivele tale"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent, // Sau Color(0xFF8B0000)
+        elevation: 0,
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 70.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Goals',
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black,
-                                offset: const Offset(0, 2),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [],
                   ),
                 ),
                 switch (myGoals.length) {
@@ -58,6 +61,20 @@ class _GoalsPageState extends State<GoalsPage> {
                   1 => Text('You have ${myGoals.length} goal'),
                   _ => Text('You have ${myGoals.length} goals'),
                 },
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: myGoals.length,
+                    itemBuilder: (context, index) {
+                      return GoalContainer(
+                        goal: myGoals[index],
+                        currentSavings: _baniEconomisiti,
+                        onDelete: () => _confirmDelete(
+                          index,
+                        ), // Trimitem indexul pentru a ști ce să ștergem
+                      );
+                    },
+                  ),
+                ),
                 ElevatedButton.icon(
                   onPressed: () {
                     _openAddGoalDialog();
@@ -74,26 +91,38 @@ class _GoalsPageState extends State<GoalsPage> {
                     ),
                   ),
                 ),
-                GoalContainer(
-                  goal: myGoals[4],
-                  onDelete: () {
-                    myGoals.removeAt(3);
-                  },
-                ),
-                // ListView.builder(
-                //   itemCount: myGoals.length,
-                //   itemBuilder: (context, index) {
-                //     return GoalContainer(
-                //       goal: myGoals[index],
-                //       onDelete: () => _confirmDelete(
-                //         index,
-                //       ), // Trimitem indexul pentru a ști ce să ștergem
-                //     );
-                //   },
-                // ),
+
+                SizedBox(height: 20),
               ],
             ),
     );
+  }
+
+  // Încărcăm datele despre fumat (start time, daily cost)
+  void _loadQuitData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? startTimeStr = prefs.getString('start_time');
+    double? savedDailyCost = prefs.getDouble('daily_cost');
+
+    if (startTimeStr != null && savedDailyCost != null) {
+      setState(() {
+        _startTime = DateTime.parse(startTimeStr);
+        _costPerSecond = savedDailyCost / 86400; // 86400 secunde într-o zi
+      });
+      _startTimer(); // Pornim timer-ul local pentru această pagină
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_startTime != null) {
+        setState(() {
+          int secondsElapsed = DateTime.now().difference(_startTime!).inSeconds;
+          _baniEconomisiti = secondsElapsed * _costPerSecond;
+        });
+      }
+    });
   }
 
   // Funcția de salvare
@@ -149,19 +178,40 @@ class _GoalsPageState extends State<GoalsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Șterge"),
-        content: const Text("Ești sigur?"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          "Șterge",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          "Ești sigur?",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Nu"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text("Nu", style: TextStyle(fontSize: 16)),
           ),
           TextButton(
             onPressed: () {
               _onDelete(index); // Apeși "Da", se execută ștergerea
               Navigator.pop(context);
             },
-            child: const Text("Da"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              "Da",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

@@ -26,7 +26,7 @@ class _AddGoalsQuestionDialogState extends State<AddGoalsQuestionDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            keyboardType: TextInputType.number,
+            keyboardType: TextInputType.text,
             onChanged: (val) => inputGoalName = val,
             decoration: const InputDecoration(
               hintText: "What do you want to buy",
