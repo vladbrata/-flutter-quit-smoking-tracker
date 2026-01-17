@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/goals_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
-import 'package:flutter_quit_smoking/pages/widgets/question_dialog.dart';
+import 'package:flutter_quit_smoking/widgets/question_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CounterPage extends StatefulWidget {
@@ -98,6 +99,18 @@ class _CounterPageState extends State<CounterPage> {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => GoalsPage()),
+                        );
+                      },
+                      child: const Text(
+                        'Add goal',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                     const Spacer(),
                     const Text(
                       "TIMP FĂRĂ FUMAT",
