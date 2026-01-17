@@ -20,4 +20,17 @@ class Goal {
       currency: map['currency'],
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Goal &&
+        other.name == name &&
+        other.price == price &&
+        other.currency == currency;
+  }
+
+  @override
+  int get hashCode => name.hashCode ^ price.hashCode ^ currency.hashCode;
 }

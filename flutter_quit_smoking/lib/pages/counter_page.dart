@@ -137,11 +137,12 @@ class _CounterPageState extends State<CounterPage> {
                   "My Financial Goals",
                   style: TextStyle(color: Colors.white),
                 ),
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => GoalsPage()),
                   );
+                  _verifySelectedGoal();
                 },
               ),
 
@@ -316,6 +317,35 @@ class _CounterPageState extends State<CounterPage> {
     } else {
       // Dacă nu avem date, arătăm dialogul de întrebări
       _showSetupDialog();
+    }
+  }
+
+  void _verifySelectedGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? savedData = prefs.getString('saved_goals_list');
+
+    if (_selectedGoal != null) {
+      if (savedData != null) {
+        Iterable decodedData = jsonDecode(savedData);
+        List<Goal> allGoals = decodedData
+            .map((item) => Goal.fromMap(item))
+            .toList();
+
+        // Verificăm dacă goal-ul selectat mai există în listă
+        // (Aici ne folosim de override-ul operatorului == din Goal)
+        if (!allGoals.contains(_selectedGoal)) {
+          setState(() {
+            _selectedGoal = null;
+          });
+          await prefs.remove('selected_goal');
+        }
+      } else {
+        // Dacă lista e goală complet, sigur nu mai există goal-ul
+        setState(() {
+          _selectedGoal = null;
+        });
+        await prefs.remove('selected_goal');
+      }
     }
   }
 
