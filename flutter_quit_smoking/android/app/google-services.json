@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "814203782361",
+    "project_id": "quit-smoking-tracker-f4bbb",
+    "storage_bucket": "quit-smoking-tracker-f4bbb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814203782361:android:a7d44f9a73e45043deaac8",
+        "android_client_info": {
+          "package_name": "com.example.flutter_quit_smoking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "814203782361-frkbppvqe5og3elkp7m00nf0jacqi4g4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUQhgyTtQ9PWVCAlf81QU__f4kCWsWX0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "814203782361-frkbppvqe5og3elkp7m00nf0jacqi4g4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

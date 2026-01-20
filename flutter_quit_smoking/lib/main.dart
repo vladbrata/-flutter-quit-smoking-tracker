@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Quit Smoking App',
       theme: ThemeData.dark(),
       // Aici se întâmplă magia:
       home: startedQuitting ? const CounterPage() : const StartQuit(),
