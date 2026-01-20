@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/auth_layout.dart';
 import 'package:flutter_quit_smoking/pages/goals_page.dart';
+import 'package:flutter_quit_smoking/pages/register_page.dart';
 import 'package:flutter_quit_smoking/pages/roadmap_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
+import 'package:flutter_quit_smoking/services/auth_services.dart';
 import 'package:flutter_quit_smoking/widgets/add_goal_widget_dialog.dart';
 import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
 import 'package:flutter_quit_smoking/widgets/mini_goal_widget.dart';
@@ -38,6 +41,18 @@ class _CounterPageState extends State<CounterPage> {
     //   _showSetupDialog();
     // });
     _loadSavedData();
+  }
+
+  void logout() {
+    try {
+      authServices.value.signOut();
+    } catch (e) {
+      print(e);
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AuthLayout()),
+    );
   }
 
   // Funcția care gestionează Dialogul și primirea datelor
@@ -166,12 +181,12 @@ class _CounterPageState extends State<CounterPage> {
               const Divider(color: Colors.white10), // Linie despărțitoare
               // Opțiunea 3: Ieșire
               ListTile(
-                leading: const Icon(Icons.exit_to_app, color: Colors.white38),
+                leading: const Icon(Icons.logout, color: Colors.white38),
                 title: const Text(
-                  "Închide",
+                  "Logout",
                   style: TextStyle(color: Colors.white38),
                 ),
-                onTap: () => Navigator.pop(context),
+                onTap: () => logout(),
               ),
             ],
           ),

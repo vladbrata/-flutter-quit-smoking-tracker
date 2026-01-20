@@ -66,4 +66,5 @@ class DefaultFirebaseOptions {
     iosClientId: '814203782361-1eurk9g6650en2l9pro6ait4akm6f7tr.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterQuitSmoking',
   );
+
 }

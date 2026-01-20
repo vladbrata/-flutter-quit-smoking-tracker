@@ -3,6 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Importă paginile tale
 import 'pages/counter_page.dart';
 import 'pages/start_quit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'pages/auth_layout.dart';
 
 void main() async {
   // Obligatoriu când avem cod async înainte de runApp
@@ -10,15 +13,14 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   // Citim starea. Dacă nu există, implicit este false.
-  bool startedQuitting = prefs.getBool('startedQuitting') ?? false;
 
-  runApp(MyApp(startedQuitting: startedQuitting));
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool startedQuitting;
-
-  const MyApp({super.key, required this.startedQuitting});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'Quit Smoking App',
       theme: ThemeData.dark(),
       // Aici se întâmplă magia:
-      home: startedQuitting ? const CounterPage() : const StartQuit(),
+      home: AuthLayout(),
     );
   }
 }

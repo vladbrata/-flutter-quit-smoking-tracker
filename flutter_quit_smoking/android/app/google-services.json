@@ -29,6 +29,13 @@
             {
               "client_id": "814203782361-frkbppvqe5og3elkp7m00nf0jacqi4g4.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "814203782361-1eurk9g6650en2l9pro6ait4akm6f7tr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterQuitSmoking"
+              }
             }
           ]
         }
