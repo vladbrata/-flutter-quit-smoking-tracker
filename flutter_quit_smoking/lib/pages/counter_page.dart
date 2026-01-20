@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/auth_layout.dart';
 import 'package:flutter_quit_smoking/pages/goals_page.dart';
-import 'package:flutter_quit_smoking/pages/register_page.dart';
+
 import 'package:flutter_quit_smoking/pages/roadmap_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/services/auth_services.dart';
@@ -267,13 +267,16 @@ class _CounterPageState extends State<CounterPage> {
                       style: TextStyle(color: Colors.white70, letterSpacing: 2),
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      _formatTime(_secundeScurse),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace', // Arată ca un ceas digital
+                    GestureDetector(
+                      onLongPress: _showEditStartTimeDialog,
+                      child: Text(
+                        _formatTime(_secundeScurse),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 35,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace', // Arată ca un ceas digital
+                        ),
                       ),
                     ),
                     const SizedBox(height: 50),
@@ -402,5 +405,88 @@ class _CounterPageState extends State<CounterPage> {
       context,
       MaterialPageRoute(builder: (context) => const StartQuit()),
     );
+  }
+
+  void _showEditStartTimeDialog() async {
+    // Current start time estimation: now minus elapsed seconds
+    final DateTime currentStartTime = DateTime.now().subtract(
+      Duration(seconds: _secundeScurse),
+    );
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: currentStartTime,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Colors.red,
+              onPrimary: Colors.black,
+              surface: Color(0xFF1E1E1E),
+              onSurface: Colors.white,
+            ),
+            dialogBackgroundColor: const Color(0xFF1E1E1E),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      if (!mounted) return;
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(currentStartTime),
+        builder: (context, child) {
+          return Theme(
+            data: ThemeData.dark().copyWith(
+              colorScheme: const ColorScheme.dark(
+                primary: Colors.red,
+                onPrimary: Colors.black,
+                surface: Color(0xFF1E1E1E),
+                onSurface: Colors.white,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedTime != null) {
+        if (!mounted) return;
+        final DateTime newStartTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        // Ensure we don't pick a time in the future
+        if (newStartTime.isAfter(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("You cannot select a time in the future!"),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        _updateStartTime(newStartTime);
+      }
+    }
+  }
+
+  void _updateStartTime(DateTime newStartTime) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('start_time', newStartTime.toIso8601String());
+
+    setState(() {
+      _secundeScurse = DateTime.now().difference(newStartTime).inSeconds;
+      _baniEconomisiti = _secundeScurse * _costPerSecunda;
+    });
   }
 }
