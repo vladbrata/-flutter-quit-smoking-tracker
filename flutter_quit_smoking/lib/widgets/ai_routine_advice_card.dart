@@ -69,23 +69,16 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1E1528), // Tentă subtilă purpuriu-violet Gemini
-            Color(0xFF141418),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
+        color: const Color(0xFF121215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBA68C8).withValues(alpha: 0.35),
-          width: 1.2,
+          color: Colors.white.withValues(alpha: 0.07),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF9C27B0).withValues(alpha: 0.15),
-            blurRadius: 18,
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -93,7 +86,7 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Iconiță Gemini + Titlu + Badge Momentul Zilei + Refresh
+          // Header: Iconiță + Titlu + Badge Momentul Zilei + Refresh
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -101,28 +94,26 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFAB47BC), Color(0xFFFFB74D)],
-                        ),
-                        borderRadius: BorderRadius.circular(9),
+                        color: Colors.white.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
                         Icons.auto_awesome_rounded,
-                        color: Colors.white,
-                        size: 16,
+                        color: Color(0xFFD4D4D8),
+                        size: 13,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     const Flexible(
                       child: Text(
                         "GHIDUL TĂU ZILNIC (AI)",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
+                          color: Color(0xFFA1A1AA),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.9,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -134,18 +125,18 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
+                      color: Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
                     ),
                     child: Text(
                       _currentTimeLabel,
                       style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFD4D4D8),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -153,14 +144,14 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
                   IconButton(
                     icon: _isLoading
                         ? const SizedBox(
-                            width: 14,
-                            height: 14,
+                            width: 13,
+                            height: 13,
                             child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFFBA68C8),
+                              strokeWidth: 1.8,
+                              color: Color(0xFFA1A1AA),
                             ),
                           )
-                        : const Icon(Icons.refresh_rounded, size: 18, color: Colors.white60),
+                        : const Icon(Icons.refresh_rounded, size: 16, color: Color(0xFF71717A)),
                     onPressed: _isLoading ? null : () => _loadAdvice(forceRefresh: true),
                     tooltip: "Generează alt sfat",
                     padding: const EdgeInsets.all(4),
@@ -175,26 +166,26 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
 
           // Conținut sfat sau skeleton loader inline
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 240),
             child: _isLoading && _adviceText == null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 12,
+                        height: 11,
                         width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(bottom: 7),
                         decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xFF1C1C22),
+                          borderRadius: BorderRadius.circular(3),
                         ),
                       ),
                       Container(
-                        height: 12,
-                        width: 240,
+                        height: 11,
+                        width: 220,
                         decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xFF1C1C22),
+                          borderRadius: BorderRadius.circular(3),
                         ),
                       ),
                     ],
@@ -203,27 +194,28 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
                     _adviceText ?? "Respiră adânc și rămâi concentrat pe progresul tău.",
                     key: ValueKey<String>(_adviceText ?? ''),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAFAFA),
                       fontSize: 13.5,
-                      height: 1.45,
+                      height: 1.5,
                       fontWeight: FontWeight.w400,
+                      letterSpacing: 0.1,
                     ),
                   ),
           ),
 
           // Opțiune configurare obiceiuri dacă nu a setat încă
           if (widget.routine.trim().isEmpty && widget.onConfigureRoutine != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             GestureDetector(
               onTap: widget.onConfigureRoutine,
               child: Row(
                 children: const [
-                  Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFFFFB74D)),
+                  Icon(Icons.edit_note_rounded, size: 15, color: Color(0xFFA1A1AA)),
                   SizedBox(width: 6),
                   Text(
-                    "Configurează când fumezi pentru sfaturi mai precise",
+                    "Configurează când fumezi pentru sfaturi precise",
                     style: TextStyle(
-                      color: Color(0xFFFFB74D),
+                      color: Color(0xFFA1A1AA),
                       fontSize: 11.5,
                       decoration: TextDecoration.underline,
                     ),

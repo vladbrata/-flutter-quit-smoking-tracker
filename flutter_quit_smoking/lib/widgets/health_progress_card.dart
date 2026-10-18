@@ -27,31 +27,24 @@ class HealthProgressCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0E2024), // nuanță discretă de cyan-teal închis
-            Color(0xFF13181C), // fundal negru-cărbune
-          ],
-        ),
+        color: const Color(0xFF121215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF00E5FF).withValues(alpha: 0.28),
-          width: 1.2,
+          color: Colors.white.withValues(alpha: 0.07),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00BFA5).withValues(alpha: 0.15),
-            blurRadius: 18,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(16),
           onTap: onTap ??
               () {
                 Navigator.push(
@@ -71,37 +64,37 @@ class HealthProgressCard extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                            color: const Color(0xFF2DD4BF).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Icon(
                             Icons.air_rounded,
-                            color: Color(0xFF00E5FF),
-                            size: 15,
+                            color: Color(0xFF2DD4BF),
+                            size: 13,
                           ),
                         ),
                         const SizedBox(width: 8),
                         const Text(
                           "RECUPERARE SĂNĂTATE",
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Color(0xFFA1A1AA),
                             fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.1,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.9,
                           ),
                         ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFF2DD4BF).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: const Color(0xFF00E5FF).withValues(alpha: 0.35),
-                          width: 0.9,
+                          color: const Color(0xFF2DD4BF).withValues(alpha: 0.22),
+                          width: 0.8,
                         ),
                       ),
                       child: Row(
@@ -109,17 +102,17 @@ class HealthProgressCard extends StatelessWidget {
                           Text(
                             "$percentInt%",
                             style: const TextStyle(
-                              color: Color(0xFF00E5FF),
-                              fontSize: 12,
+                              color: Color(0xFF2DD4BF),
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 4),
                           Text(
-                            "($completedCount/$totalCount etape)",
+                            "($completedCount/$totalCount)",
                             style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 10.5,
+                              color: Color(0xFF71717A),
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -136,7 +129,7 @@ class HealthProgressCard extends StatelessWidget {
                     // Iconița Plămâni
                     LungsProgressWidget(
                       progress: overallProgress,
-                      size: 72,
+                      size: 68,
                       showPercentage: false,
                     ),
                     const SizedBox(width: 16),
@@ -153,27 +146,29 @@ class HealthProgressCard extends StatelessWidget {
                                   child: Text(
                                     "Următoarea: ${nextMilestone.title}",
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFFFAFAFA),
                                       fontSize: 13.5,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.2,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.1,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
+                                const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.amber.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
+                                    color: Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                                   ),
                                   child: Text(
                                     HealthMilestoneService.formatTimeRemaining(timeRemaining),
                                     style: const TextStyle(
-                                      color: Color(0xFFFFCA28),
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFD4D4D8),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
@@ -183,9 +178,9 @@ class HealthProgressCard extends StatelessWidget {
                             Text(
                               nextMilestone.description,
                               style: const TextStyle(
-                                color: Colors.white60,
+                                color: Color(0xFFA1A1AA),
                                 fontSize: 11.5,
-                                height: 1.3,
+                                height: 1.35,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -193,29 +188,29 @@ class HealthProgressCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             // Mini bară de progres spre această bornă
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(3),
                               child: LinearProgressIndicator(
                                 value: nextMilestoneProgress,
-                                minHeight: 4.5,
-                                backgroundColor: Colors.white12,
+                                minHeight: 3.5,
+                                backgroundColor: Colors.white.withValues(alpha: 0.06),
                                 valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF00E5FF),
+                                  Color(0xFF2DD4BF),
                                 ),
                               ),
                             ),
                           ] else ...[
                             const Text(
-                              "Felicitări! Toate etapele atinse!",
+                              "Toate etapele atinse",
                               style: TextStyle(
-                                color: Color(0xFF69F0AE),
+                                color: Color(0xFF34D399),
                                 fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 4),
                             const Text(
-                              "Riscul bolilor legate de fumat a revenit complet la nivelul unui nefumător.",
-                              style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                              "Riscul bolilor legate de fumat a revenit la nivelul unui nefumător.",
+                              style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 11.5),
                             ),
                           ],
                           const SizedBox(height: 8),
@@ -225,16 +220,16 @@ class HealthProgressCard extends StatelessWidget {
                               Text(
                                 "Vezi traseul complet",
                                 style: TextStyle(
-                                  color: Color(0xFF00E5FF),
+                                  color: Color(0xFFA1A1AA),
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              SizedBox(width: 4),
+                              SizedBox(width: 3),
                               Icon(
                                 Icons.arrow_forward_ios_rounded,
-                                size: 10,
-                                color: Color(0xFF00E5FF),
+                                size: 9,
+                                color: Color(0xFFA1A1AA),
                               ),
                             ],
                           ),

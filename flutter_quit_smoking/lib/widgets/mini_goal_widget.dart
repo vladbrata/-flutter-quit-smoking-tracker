@@ -40,32 +40,19 @@ class MiniGoalWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isCompleted
-              ? const [
-                  Color(0xFF14241A),
-                  Color(0xFF121413),
-                ]
-              : const [
-                  Color(0xFF221114),
-                  Color(0xFF131316),
-                ],
-        ),
+        color: const Color(0xFF121215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isCompleted
-              ? Colors.greenAccent.withValues(alpha: 0.5)
-              : const Color(0xFF8B0000).withValues(alpha: 0.5),
-          width: 1.4,
+              ? const Color(0xFF10B981).withValues(alpha: 0.25)
+              : Colors.white.withValues(alpha: 0.07),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isCompleted ? Colors.greenAccent : const Color(0xFF8B0000))
-                .withValues(alpha: 0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -85,29 +72,29 @@ class MiniGoalWidget extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(7),
+                          padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             color: (isCompleted
-                                    ? Colors.greenAccent
-                                    : const Color(0xFF8B0000))
-                                .withValues(alpha: 0.3),
-                            shape: BoxShape.circle,
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFE11D48))
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
-                            isCompleted ? Icons.emoji_events_rounded : Icons.flag_rounded,
-                            size: 16,
-                            color: isCompleted ? Colors.greenAccent : const Color(0xFFFF5252),
+                            isCompleted ? Icons.check_circle_outline_rounded : Icons.flag_outlined,
+                            size: 13,
+                            color: isCompleted ? const Color(0xFF34D399) : const Color(0xFFFB7185),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             goal.name,
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.3,
+                              color: Color(0xFFFAFAFA),
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.1,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -117,22 +104,20 @@ class MiniGoalWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: (isCompleted ? Colors.greenAccent : const Color(0xFF8B0000))
-                          .withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: (isCompleted ? Colors.greenAccent : const Color(0xFFFF5252))
-                            .withValues(alpha: 0.5),
-                        width: 1.0,
+                        color: Colors.white.withValues(alpha: 0.08),
+                        width: 0.8,
                       ),
                     ),
                     child: Text(
                       "$percentage%",
                       style: TextStyle(
-                        color: isCompleted ? Colors.greenAccent : Colors.white,
-                        fontSize: 12.5,
+                        color: isCompleted ? const Color(0xFF34D399) : const Color(0xFFFAFAFA),
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -143,17 +128,17 @@ class MiniGoalWidget extends StatelessWidget {
 
               // Progress Bar
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(3),
                 child: LinearProgressIndicator(
                   value: progressValue,
-                  minHeight: 7,
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  minHeight: 3.5,
+                  backgroundColor: Colors.white.withValues(alpha: 0.06),
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isCompleted ? Colors.greenAccent : const Color(0xFFE53935),
+                    isCompleted ? const Color(0xFF34D399) : const Color(0xFFE11D48),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // Footer: Zile rămase și Suma
               Row(
@@ -162,21 +147,21 @@ class MiniGoalWidget extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        isCompleted ? Icons.check_circle_outline_rounded : Icons.hourglass_bottom_rounded,
-                        size: 14,
-                        color: isCompleted ? Colors.greenAccent : const Color(0xFFFF8A80),
+                        isCompleted ? Icons.check_circle_outline_rounded : Icons.schedule_rounded,
+                        size: 13,
+                        color: isCompleted ? const Color(0xFF34D399) : const Color(0xFF71717A),
                       ),
                       const SizedBox(width: 5),
                       Text(
                         isCompleted
-                            ? "Obiectiv atins cu succes!"
+                            ? "Obiectiv realizat"
                             : dailyCost > 0
-                                ? "$daysRemaining ${daysRemaining == 1 ? 'zi' : 'zile'} fără fumat"
+                                ? "$daysRemaining ${daysRemaining == 1 ? 'zi' : 'zile'} rămase"
                                 : "Calculează zile",
                         style: TextStyle(
-                          color: isCompleted ? Colors.greenAccent : Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          color: isCompleted ? const Color(0xFF34D399) : const Color(0xFFA1A1AA),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -184,8 +169,8 @@ class MiniGoalWidget extends StatelessWidget {
                   Text(
                     "${savingsInGoalCurrency.toStringAsFixed(1)} / ${goal.price} ${goal.currency}",
                     style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12,
+                      color: Color(0xFF71717A),
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

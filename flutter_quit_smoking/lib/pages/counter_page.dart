@@ -650,17 +650,17 @@ class _CounterPageState extends State<CounterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF09090B),
       drawer: Drawer(
         child: Container(
-          color: const Color(0xFF121212),
+          color: const Color(0xFF101013),
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
               // Drawer Header cu datele utilizatorului conectat
               DrawerHeader(
                 decoration: const BoxDecoration(
-                  color: Color(0xFF8B0000),
+                  color: Color(0xFF16161A),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,13 +668,13 @@ class _CounterPageState extends State<CounterPage> {
                   children: [
                     Row(
                       children: const [
-                        Icon(Icons.smoke_free, color: Colors.white, size: 36),
+                        Icon(Icons.smoke_free, color: Colors.white, size: 28),
                         SizedBox(width: 10),
                         Text(
                           "Quit Smoking",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -685,15 +685,15 @@ class _CounterPageState extends State<CounterPage> {
                       _userName.isNotEmpty ? _userName : "Cont Utilizator",
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       _userEmail.isNotEmpty ? _userEmail : "Sincronizat cu Firebase",
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: Color(0xFFA1A1AA),
                         fontSize: 12,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -702,7 +702,7 @@ class _CounterPageState extends State<CounterPage> {
                       const SizedBox(height: 4),
                       Text(
                         "${_packPrice.toStringAsFixed(1)} RON/pachet | $_cigarettesPerDay țigări/zi (${_packsPerDay.toStringAsFixed(1)} pach)",
-                        style: const TextStyle(color: Colors.white60, fontSize: 11),
+                        style: const TextStyle(color: Color(0xFF71717A), fontSize: 11),
                       ),
                     ],
                   ],
@@ -710,14 +710,14 @@ class _CounterPageState extends State<CounterPage> {
               ),
 
               ListTile(
-                leading: const Icon(Icons.air_rounded, color: Color(0xFFFF5252)),
+                leading: const Icon(Icons.air_rounded, color: Color(0xFFFB7185), size: 20),
                 title: const Text(
                   "SOS Craving",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 subtitle: const Text(
                   "Exerciții de respirație pentru pofte",
-                  style: TextStyle(color: Colors.white54, fontSize: 11),
+                  style: TextStyle(color: Color(0xFF71717A), fontSize: 11),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -728,8 +728,8 @@ class _CounterPageState extends State<CounterPage> {
               const Divider(color: Colors.white10),
 
               ListTile(
-                leading: const Icon(Icons.attach_money_sharp, color: Colors.grey),
-                title: const Text("Obiective Financiare", style: TextStyle(color: Colors.white)),
+                leading: const Icon(Icons.flag_outlined, color: Color(0xFFA1A1AA), size: 20),
+                title: const Text("Obiective Financiare", style: TextStyle(color: Colors.white, fontSize: 14)),
                 onTap: () async {
                   await Navigator.push(
                     context,
@@ -740,8 +740,8 @@ class _CounterPageState extends State<CounterPage> {
               ),
 
               ListTile(
-                leading: const Icon(Icons.timeline, color: Colors.grey),
-                title: const Text("Traseu Sănătate (Roadmap)", style: TextStyle(color: Colors.white)),
+                leading: const Icon(Icons.timeline, color: Color(0xFFA1A1AA), size: 20),
+                title: const Text("Traseu Sănătate (Roadmap)", style: TextStyle(color: Colors.white, fontSize: 14)),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -751,9 +751,9 @@ class _CounterPageState extends State<CounterPage> {
               ),
 
               ListTile(
-                leading: const Icon(Icons.tune, color: Colors.grey),
-                title: const Text("Editează Obiceiuri Fumat", style: TextStyle(color: Colors.white)),
-                subtitle: const Text("Schimbă preț pachet, țigări/zi și rutină", style: TextStyle(color: Colors.white38, fontSize: 11)),
+                leading: const Icon(Icons.tune, color: Color(0xFFA1A1AA), size: 20),
+                title: const Text("Editează Obiceiuri Fumat", style: TextStyle(color: Colors.white, fontSize: 14)),
+                subtitle: const Text("Schimbă preț pachet, țigări/zi și rutină", style: TextStyle(color: Color(0xFF71717A), fontSize: 11)),
                 onTap: () {
                   Navigator.pop(context);
                   _editSmokingHabits();
@@ -761,9 +761,9 @@ class _CounterPageState extends State<CounterPage> {
               ),
 
               ListTile(
-                leading: const Icon(Icons.auto_awesome_rounded, color: Color(0xFFBA68C8)),
-                title: const Text("Cheie Gemini API (Opțional)", style: TextStyle(color: Colors.white)),
-                subtitle: const Text("Pentru sfaturi generate dinamic cu AI", style: TextStyle(color: Colors.white38, fontSize: 11)),
+                leading: const Icon(Icons.auto_awesome_rounded, color: Color(0xFFA1A1AA), size: 20),
+                title: const Text("Cheie Gemini API (Opțional)", style: TextStyle(color: Colors.white, fontSize: 14)),
+                subtitle: const Text("Pentru sfaturi generate dinamic cu AI", style: TextStyle(color: Color(0xFF71717A), fontSize: 11)),
                 onTap: () {
                   Navigator.pop(context);
                   _showApiKeyDialog();
@@ -773,8 +773,8 @@ class _CounterPageState extends State<CounterPage> {
               const Divider(color: Colors.white10),
 
               ListTile(
-                leading: const Icon(Icons.logout, color: Colors.white38),
-                title: const Text("Deconectare", style: TextStyle(color: Colors.white38)),
+                leading: const Icon(Icons.logout, color: Color(0xFF71717A), size: 20),
+                title: const Text("Deconectare", style: TextStyle(color: Color(0xFF71717A), fontSize: 14)),
                 onTap: () => logout(),
               ),
             ],
@@ -787,28 +787,48 @@ class _CounterPageState extends State<CounterPage> {
         title: const Text(
           "Quit Smoking",
           style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
+            color: Color(0xFFFAFAFA),
           ),
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            tooltip: "SOS Craving - Exerciții de Respirație",
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF8B0000).withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFFF5252), width: 1.2),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: _openSosCravingDialog,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFE11D48).withValues(alpha: 0.3),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.air_rounded, color: Color(0xFFFB7185), size: 14),
+                    SizedBox(width: 4),
+                    Text(
+                      "SOS",
+                      style: TextStyle(
+                        color: Color(0xFFFB7185),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: const Icon(Icons.air_rounded, color: Color(0xFFFF5252), size: 18),
             ),
-            onPressed: _openSosCravingDialog,
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
@@ -823,7 +843,7 @@ class _CounterPageState extends State<CounterPage> {
                 children: [
                   // Cardul Obiectiv Activ (Skeleton sau Conținut)
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
+                    duration: const Duration(milliseconds: 240),
                     child: _isGoalLoading
                         ? const SkeletonGoalCard(key: ValueKey('sk_goal'))
                         : KeyedSubtree(
@@ -831,11 +851,11 @@ class _CounterPageState extends State<CounterPage> {
                             child: _buildGoalSection(),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Hero Stat Card: Timp Fără Fumat (Skeleton sau Conținut)
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
+                    duration: const Duration(milliseconds: 240),
                     child: _isTimerLoading
                         ? const SkeletonTimerCard(key: ValueKey('sk_timer'))
                         : KeyedSubtree(
@@ -843,11 +863,11 @@ class _CounterPageState extends State<CounterPage> {
                             child: _buildTimerCard(),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Grid 2 Coloane: Economii și Țigări Evitate (Skeleton sau Conținut)
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
+                    duration: const Duration(milliseconds: 240),
                     child: _isStatsLoading
                         ? const SkeletonStatsGrid(key: ValueKey('sk_stats'))
                         : KeyedSubtree(
@@ -855,11 +875,11 @@ class _CounterPageState extends State<CounterPage> {
                             child: _buildStatsGrid(),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Container Progres Sănătate (Plămâni interactivi din Roadmap)
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
+                    duration: const Duration(milliseconds: 240),
                     child: _isHealthLoading
                         ? const SkeletonHealthCard(key: ValueKey('sk_health'))
                         : KeyedSubtree(
@@ -869,11 +889,11 @@ class _CounterPageState extends State<CounterPage> {
                             ),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Sfat Inteligent Personalizat Rutină (Gemini AI)
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
+                    duration: const Duration(milliseconds: 240),
                     child: _isAiAdviceLoading
                         ? const SkeletonAiAdviceCard(key: ValueKey('sk_ai_advice'))
                         : KeyedSubtree(
@@ -887,29 +907,29 @@ class _CounterPageState extends State<CounterPage> {
                             ),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Buton SOS Craving Card
                   _buildSosLifelineCard(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Butoane Navigare Rapidă
                   _buildQuickNavigationRow(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Buton Reset Progresie
                   if (_isStarted) ...[
                     Center(
                       child: TextButton.icon(
                         onPressed: _confirmResetProgression,
-                        icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white38),
+                        icon: const Icon(Icons.refresh_rounded, size: 14, color: Color(0xFF71717A)),
                         label: const Text(
-                          "Am fumat o țigară (resetează progresul)",
-                          style: TextStyle(color: Colors.white38, fontSize: 12.5),
+                          "Resetează progresul",
+                          style: TextStyle(color: Color(0xFF71717A), fontSize: 12),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ],
               ),
@@ -923,7 +943,7 @@ class _CounterPageState extends State<CounterPage> {
   Widget _buildGoalSection() {
     if (_selectedGoal != null) {
       return InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         onTap: () async {
           final result = await showDialog(
             context: context,
@@ -964,31 +984,24 @@ class _CounterPageState extends State<CounterPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF221114),
-            Color(0xFF131316),
-          ],
-        ),
+        color: const Color(0xFF121215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF8B0000).withValues(alpha: 0.5),
-          width: 1.4,
+          color: Colors.white.withValues(alpha: 0.07),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8B0000).withValues(alpha: 0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           onTap: () async {
             final result = await showDialog(
               context: context,
@@ -1007,22 +1020,22 @@ class _CounterPageState extends State<CounterPage> {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B0000).withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Icon(
-                    Icons.stars_rounded,
-                    color: Color(0xFFFFB300),
-                    size: 24,
+                    Icons.flag_outlined,
+                    color: Color(0xFFD4D4D8),
+                    size: 14,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1030,24 +1043,24 @@ class _CounterPageState extends State<CounterPage> {
                       Text(
                         "Setează un Obiectiv Financiar",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.3,
+                          color: Color(0xFFFAFAFA),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.1,
                         ),
                       ),
-                      SizedBox(height: 3),
+                      SizedBox(height: 2),
                       Text(
-                        "Atinge pentru a alege ce cumperi din economii",
-                        style: TextStyle(color: Colors.white60, fontSize: 12),
+                        "Asociază economiile cu o recompensă concretă",
+                        style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 11.5),
                       ),
                     ],
                   ),
                 ),
                 const Icon(
-                  Icons.add_circle_outline_rounded,
-                  color: Color(0xFFFFB300),
-                  size: 22,
+                  Icons.add_rounded,
+                  color: Color(0xFFA1A1AA),
+                  size: 18,
                 ),
               ],
             ),
@@ -1061,24 +1074,17 @@ class _CounterPageState extends State<CounterPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF221114),
-            Color(0xFF131316),
-          ],
-        ),
+        color: const Color(0xFF121215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF8B0000).withValues(alpha: 0.5),
-          width: 1.4,
+          color: Colors.white.withValues(alpha: 0.07),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8B0000).withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1087,64 +1093,54 @@ class _CounterPageState extends State<CounterPage> {
         child: Tooltip(
           message: "Apasă lung pentru a ajusta data/ora de start",
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             onLongPress: _showEditStartTimeDialog,
             child: Padding(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8B0000).withValues(alpha: 0.3),
-                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Icon(
                           Icons.timer_outlined,
-                          color: Color(0xFFFF5252),
-                          size: 16,
+                          color: Color(0xFFD4D4D8),
+                          size: 13,
                         ),
                       ),
                       const SizedBox(width: 8),
                       const Text(
                         "TIMP FĂRĂ FUMAT",
                         style: TextStyle(
-                          color: Colors.white70,
-                          letterSpacing: 2.0,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFA1A1AA),
+                          letterSpacing: 1.2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Text(
                     _formatTime(_secundeScurse),
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFAFAFA),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
                       fontFamily: 'monospace',
-                      letterSpacing: 1.5,
-                      shadows: [
-                        Shadow(color: Color(0xFF8B0000), blurRadius: 16),
-                      ],
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.touch_app_outlined, size: 13, color: Colors.white38),
-                      SizedBox(width: 4),
-                      Text(
-                        "Apasă lung pentru a edita data de start",
-                        style: TextStyle(color: Colors.white38, fontSize: 11),
-                      ),
-                    ],
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Apasă lung pentru a edita data de start",
+                    style: TextStyle(color: Color(0xFF71717A), fontSize: 11),
                   ),
                 ],
               ),
@@ -1161,17 +1157,17 @@ class _CounterPageState extends State<CounterPage> {
         // Card Bani Economisiți
         Expanded(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF151518),
-              borderRadius: BorderRadius.circular(20),
+              color: const Color(0xFF121215),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.greenAccent.withValues(alpha: 0.25),
-                width: 1.1,
+                color: Colors.white.withValues(alpha: 0.07),
+                width: 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
+                  color: Colors.black.withValues(alpha: 0.35),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1183,24 +1179,24 @@ class _CounterPageState extends State<CounterPage> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: Colors.greenAccent.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
-                        Icons.savings_rounded,
-                        color: Colors.greenAccent,
-                        size: 16,
+                        Icons.savings_outlined,
+                        color: Color(0xFF34D399),
+                        size: 13,
                       ),
                     ),
                     const SizedBox(width: 6),
                     const Text(
                       "ECONOMII",
                       style: TextStyle(
-                        color: Colors.white60,
+                        color: Color(0xFFA1A1AA),
                         fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -1210,18 +1206,15 @@ class _CounterPageState extends State<CounterPage> {
                 Text(
                   "${_baniEconomisiti.toStringAsFixed(2)} RON",
                   style: const TextStyle(
-                    color: Colors.greenAccent,
+                    color: Color(0xFF34D399),
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(color: Colors.greenAccent, blurRadius: 10),
-                    ],
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _dailyCost > 0 ? "${_dailyCost.toStringAsFixed(1)} RON / zi" : "Configurat",
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  style: const TextStyle(color: Color(0xFF71717A), fontSize: 11),
                 ),
               ],
             ),
@@ -1232,17 +1225,17 @@ class _CounterPageState extends State<CounterPage> {
         // Card Țigări Evitate
         Expanded(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF151518),
-              borderRadius: BorderRadius.circular(20),
+              color: const Color(0xFF121215),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFFF5252).withValues(alpha: 0.25),
-                width: 1.1,
+                color: Colors.white.withValues(alpha: 0.07),
+                width: 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
+                  color: Colors.black.withValues(alpha: 0.35),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1254,24 +1247,24 @@ class _CounterPageState extends State<CounterPage> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF5252).withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
-                        Icons.smoke_free_rounded,
-                        color: Color(0xFFFF5252),
-                        size: 16,
+                        Icons.smoke_free_outlined,
+                        color: Color(0xFFD4D4D8),
+                        size: 13,
                       ),
                     ),
                     const SizedBox(width: 6),
                     const Text(
                       "EVITATE",
                       style: TextStyle(
-                        color: Colors.white60,
+                        color: Color(0xFFA1A1AA),
                         fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -1281,15 +1274,15 @@ class _CounterPageState extends State<CounterPage> {
                 Text(
                   "$_tigariEvitate",
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFAFAFA),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   "țigări nefumate",
-                  style: TextStyle(color: Colors.white38, fontSize: 11),
+                  style: TextStyle(color: Color(0xFF71717A), fontSize: 11),
                 ),
               ],
             ),
@@ -1303,80 +1296,67 @@ class _CounterPageState extends State<CounterPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2E0C10),
-            Color(0xFF1A090B),
-          ],
-        ),
+        color: const Color(0xFF161215),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFF5252).withValues(alpha: 0.5),
-          width: 1.2,
+          color: const Color(0xFFE11D48).withValues(alpha: 0.25),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8B0000).withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(16),
           onTap: _openSosCravingDialog,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B0000),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF5252).withValues(alpha: 0.4),
-                        blurRadius: 10,
-                      ),
-                    ],
+                    color: const Color(0xFFE11D48).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.air_rounded,
-                    color: Colors.white,
-                    size: 24,
+                    color: Color(0xFFFB7185),
+                    size: 16,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "AI O POFTĂ? RESPIRĂ (SOS)",
+                        "Urgență poftă (SOS)",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                          color: Color(0xFFFAFAFA),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
                         ),
                       ),
-                      SizedBox(height: 3),
+                      SizedBox(height: 2),
                       Text(
-                        "Exerciții de respirație ghidate pentru depășirea poftei",
-                        style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                        "Ghid de respirație și recalibrare mentală",
+                        style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 11.5),
                       ),
                     ],
                   ),
                 ),
                 const Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: Colors.white54,
-                  size: 16,
+                  color: Color(0xFF71717A),
+                  size: 12,
                 ),
               ],
             ),
@@ -1398,16 +1378,16 @@ class _CounterPageState extends State<CounterPage> {
               );
               _verifySelectedGoal();
             },
-            icon: const Icon(Icons.savings_outlined, color: Colors.white70, size: 18),
+            icon: const Icon(Icons.flag_outlined, color: Color(0xFFD4D4D8), size: 15),
             label: const Text(
               "Obiective",
-              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(color: Color(0xFFD4D4D8), fontSize: 12.5, fontWeight: FontWeight.w500),
             ),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              side: const BorderSide(color: Colors.white12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              backgroundColor: const Color(0xFF16161A),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: const Color(0xFF121215),
             ),
           ),
         ),
@@ -1420,16 +1400,16 @@ class _CounterPageState extends State<CounterPage> {
                 MaterialPageRoute(builder: (context) => const RoadmapPage()),
               );
             },
-            icon: const Icon(Icons.timeline, color: Colors.white70, size: 18),
+            icon: const Icon(Icons.timeline, color: Color(0xFFD4D4D8), size: 15),
             label: const Text(
               "Sănătate",
-              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(color: Color(0xFFD4D4D8), fontSize: 12.5, fontWeight: FontWeight.w500),
             ),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              side: const BorderSide(color: Colors.white12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              backgroundColor: const Color(0xFF16161A),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: const Color(0xFF121215),
             ),
           ),
         ),

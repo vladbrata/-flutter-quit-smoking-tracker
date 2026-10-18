@@ -44,9 +44,9 @@ class _SkeletonShimmerState extends State<SkeletonShimmer>
               begin: Alignment(slide - 0.7, -0.3),
               end: Alignment(slide + 0.7, 0.3),
               colors: const [
-                Color(0xFF1E1E24),
-                Color(0xFF32323C),
-                Color(0xFF1E1E24),
+                Color(0xFF121215),
+                Color(0xFF222228),
+                Color(0xFF121215),
               ],
               stops: const [0.0, 0.5, 1.0],
             ).createShader(bounds);
@@ -68,7 +68,7 @@ class SkeletonBox extends StatelessWidget {
     super.key,
     this.width,
     this.height,
-    this.borderRadius = 8,
+    this.borderRadius = 6,
   });
 
   @override
@@ -77,7 +77,7 @@ class SkeletonBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF222228),
+        color: const Color(0xFF1C1C22),
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
@@ -95,26 +95,26 @@ class SkeletonGoalCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151518),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white10),
+          color: const Color(0xFF121215),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Row(
           children: [
-            const SkeletonBox(width: 44, height: 44, borderRadius: 22),
+            const SkeletonBox(width: 40, height: 40, borderRadius: 10),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  SkeletonBox(width: 160, height: 14, borderRadius: 6),
+                  SkeletonBox(width: 150, height: 13, borderRadius: 4),
                   SizedBox(height: 8),
-                  SkeletonBox(width: 220, height: 10, borderRadius: 4),
+                  SkeletonBox(width: 210, height: 10, borderRadius: 3),
                 ],
               ),
             ),
             const SizedBox(width: 10),
-            const SkeletonBox(width: 20, height: 20, borderRadius: 10),
+            const SkeletonBox(width: 18, height: 18, borderRadius: 9),
           ],
         ),
       ),
@@ -131,26 +131,26 @@ class SkeletonTimerCard extends StatelessWidget {
     return SkeletonShimmer(
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
-          color: const Color(0xFF151518),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white10),
+          color: const Color(0xFF121215),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Column(
           children: const [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SkeletonBox(width: 22, height: 22, borderRadius: 11),
+                SkeletonBox(width: 14, height: 14, borderRadius: 7),
                 SizedBox(width: 8),
-                SkeletonBox(width: 140, height: 12, borderRadius: 6),
+                SkeletonBox(width: 120, height: 11, borderRadius: 4),
               ],
             ),
-            SizedBox(height: 18),
-            SkeletonBox(width: 260, height: 38, borderRadius: 10),
-            SizedBox(height: 14),
-            SkeletonBox(width: 180, height: 10, borderRadius: 5),
+            SizedBox(height: 16),
+            SkeletonBox(width: 240, height: 34, borderRadius: 6),
+            SizedBox(height: 12),
+            SkeletonBox(width: 160, height: 9, borderRadius: 3),
           ],
         ),
       ),
@@ -170,26 +170,26 @@ class SkeletonStatsGrid extends StatelessWidget {
           // Coloana 1: Economii
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFF151518),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white10),
+                color: const Color(0xFF121215),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Row(
                     children: [
-                      SkeletonBox(width: 22, height: 22, borderRadius: 11),
-                      SizedBox(width: 8),
-                      SkeletonBox(width: 65, height: 11, borderRadius: 5),
+                      SkeletonBox(width: 14, height: 14, borderRadius: 7),
+                      SizedBox(width: 6),
+                      SkeletonBox(width: 60, height: 10, borderRadius: 3),
                     ],
                   ),
-                  SizedBox(height: 14),
-                  SkeletonBox(width: 110, height: 22, borderRadius: 6),
-                  SizedBox(height: 8),
-                  SkeletonBox(width: 75, height: 10, borderRadius: 4),
+                  SizedBox(height: 12),
+                  SkeletonBox(width: 100, height: 20, borderRadius: 4),
+                  SizedBox(height: 6),
+                  SkeletonBox(width: 70, height: 9, borderRadius: 3),
                 ],
               ),
             ),
@@ -198,26 +198,26 @@ class SkeletonStatsGrid extends StatelessWidget {
           // Coloana 2: Țigări Evitate
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFF151518),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white10),
+                color: const Color(0xFF121215),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Row(
                     children: [
-                      SkeletonBox(width: 22, height: 22, borderRadius: 11),
-                      SizedBox(width: 8),
-                      SkeletonBox(width: 65, height: 11, borderRadius: 5),
+                      SkeletonBox(width: 14, height: 14, borderRadius: 7),
+                      SizedBox(width: 6),
+                      SkeletonBox(width: 60, height: 10, borderRadius: 3),
                     ],
                   ),
-                  SizedBox(height: 14),
-                  SkeletonBox(width: 90, height: 22, borderRadius: 6),
-                  SizedBox(height: 8),
-                  SkeletonBox(width: 80, height: 10, borderRadius: 4),
+                  SizedBox(height: 12),
+                  SkeletonBox(width: 80, height: 20, borderRadius: 4),
+                  SizedBox(height: 6),
+                  SkeletonBox(width: 75, height: 9, borderRadius: 3),
                 ],
               ),
             ),
@@ -239,9 +239,9 @@ class SkeletonHealthCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151518),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white10),
+          color: const Color(0xFF121215),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Column(
           children: [
@@ -250,29 +250,29 @@ class SkeletonHealthCard extends StatelessWidget {
               children: const [
                 Row(
                   children: [
-                    SkeletonBox(width: 22, height: 22, borderRadius: 11),
+                    SkeletonBox(width: 14, height: 14, borderRadius: 7),
                     SizedBox(width: 8),
-                    SkeletonBox(width: 140, height: 11, borderRadius: 5),
+                    SkeletonBox(width: 130, height: 11, borderRadius: 3),
                   ],
                 ),
-                SkeletonBox(width: 90, height: 22, borderRadius: 11),
+                SkeletonBox(width: 80, height: 20, borderRadius: 10),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 // Simulare plămâni
-                const SkeletonBox(width: 72, height: 72, borderRadius: 18),
+                const SkeletonBox(width: 64, height: 64, borderRadius: 14),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      SkeletonBox(width: 160, height: 14, borderRadius: 6),
+                      SkeletonBox(width: 150, height: 13, borderRadius: 4),
                       SizedBox(height: 8),
-                      SkeletonBox(width: 200, height: 10, borderRadius: 4),
+                      SkeletonBox(width: 190, height: 10, borderRadius: 3),
                       SizedBox(height: 10),
-                      SkeletonBox(height: 5, borderRadius: 3),
+                      SkeletonBox(height: 4, borderRadius: 2),
                     ],
                   ),
                 ),
@@ -292,7 +292,7 @@ class SkeletonPageLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF09090B),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -304,13 +304,13 @@ class SkeletonPageLoading extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: const [
                   SkeletonGoalCard(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 14),
                   SkeletonTimerCard(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 14),
                   SkeletonStatsGrid(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 14),
                   SkeletonHealthCard(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 14),
                   SkeletonAiAdviceCard(),
                 ],
               ),
@@ -333,9 +333,9 @@ class SkeletonAiAdviceCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151518),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white10),
+          color: const Color(0xFF121215),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,20 +345,20 @@ class SkeletonAiAdviceCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    SkeletonBox(width: 22, height: 22, borderRadius: 11),
+                    SkeletonBox(width: 14, height: 14, borderRadius: 7),
                     SizedBox(width: 8),
-                    SkeletonBox(width: 130, height: 11, borderRadius: 5),
+                    SkeletonBox(width: 120, height: 11, borderRadius: 3),
                   ],
                 ),
-                SkeletonBox(width: 85, height: 22, borderRadius: 11),
+                SkeletonBox(width: 70, height: 20, borderRadius: 10),
               ],
             ),
             SizedBox(height: 14),
-            SkeletonBox(width: double.infinity, height: 13, borderRadius: 5),
+            SkeletonBox(width: double.infinity, height: 12, borderRadius: 3),
             SizedBox(height: 8),
-            SkeletonBox(width: 280, height: 13, borderRadius: 5),
+            SkeletonBox(width: 260, height: 12, borderRadius: 3),
             SizedBox(height: 8),
-            SkeletonBox(width: 190, height: 11, borderRadius: 5),
+            SkeletonBox(width: 180, height: 10, borderRadius: 3),
           ],
         ),
       ),

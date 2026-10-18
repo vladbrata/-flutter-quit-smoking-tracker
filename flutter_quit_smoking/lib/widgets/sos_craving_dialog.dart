@@ -260,13 +260,13 @@ class _SosCravingDialogState extends State<SosCravingDialog>
   Color get _phaseColor {
     switch (_currentPhase) {
       case BreathingPhase.inhale:
-        return const Color(0xFF00E676); // Verde vitalitate
+        return const Color(0xFF2DD4BF); // Calm teal
       case BreathingPhase.holdIn:
-        return const Color(0xFFFFB300); // Chihlimbar calm
+        return const Color(0xFFE4E4E7); // Calm white/zinc
       case BreathingPhase.exhale:
-        return const Color(0xFF29B6F6); // Albastru destindere
+        return const Color(0xFF38BDF8); // Gentle sky
       case BreathingPhase.holdOut:
-        return const Color(0xFFBA68C8); // Violet pauză
+        return const Color(0xFFA1A1AA); // Muted zinc
     }
   }
 
@@ -277,28 +277,27 @@ class _SosCravingDialogState extends State<SosCravingDialog>
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
+          constraints: const BoxConstraints(maxWidth: 460),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF141416),
-              borderRadius: BorderRadius.circular(28),
+              color: const Color(0xFF101013),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: const Color(0xFF8B0000).withValues(alpha: 0.6),
-                width: 1.5,
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF8B0000).withValues(alpha: 0.35),
+                  color: Colors.black.withValues(alpha: 0.65),
                   blurRadius: 36,
-                  spreadRadius: 4,
-                  offset: const Offset(0, 10),
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(18),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
                 child: _isCompleted ? _buildCompletedView() : _buildActiveView(),
               ),
             ),
@@ -320,15 +319,15 @@ class _SosCravingDialogState extends State<SosCravingDialog>
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF8B0000).withValues(alpha: 0.25),
-                      shape: BoxShape.circle,
+                      color: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.air_rounded,
-                      color: Color(0xFFFF5252),
-                      size: 22,
+                      color: Color(0xFFFB7185),
+                      size: 16,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -339,16 +338,16 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                         Text(
                           "SOS CRAVING",
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                            color: Color(0xFFFAFAFA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.9,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          "Respiră și recapătă controlul",
-                          style: TextStyle(color: Colors.white54, fontSize: 11),
+                          "Respiră conștient. Impulsul scade în câteva minute.",
+                          style: TextStyle(color: Color(0xFF71717A), fontSize: 11),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -358,22 +357,24 @@ class _SosCravingDialogState extends State<SosCravingDialog>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close_rounded, color: Colors.white70),
+              icon: const Icon(Icons.close_rounded, color: Color(0xFF71717A), size: 20),
               onPressed: () => Navigator.of(context).pop(),
               tooltip: "Închide",
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
 
         // Selector Tehnică Respirație
         Container(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E22),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white10),
+            color: const Color(0xFF16161A),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
           ),
           child: Row(
             children: [
@@ -403,56 +404,42 @@ class _SosCravingDialogState extends State<SosCravingDialog>
           builder: (context, child) {
             final scale = _scaleAnimation.value;
             return SizedBox(
-              height: 180,
-              width: 180,
+              height: 170,
+              width: 170,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Cercul exterior radiant (glow)
-                  Transform.scale(
-                    scale: scale,
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            _phaseColor.withValues(alpha: 0.35),
-                            _phaseColor.withValues(alpha: 0.05),
-                            Colors.transparent,
-                          ],
-                          stops: const [0.4, 0.75, 1.0],
-                        ),
+                  // Ghid circular exterior discret
+                  Container(
+                    width: 148,
+                    height: 148,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        width: 1.0,
                       ),
                     ),
                   ),
 
-                  // Cercul principal
+                  // Cercul principal animat
                   Transform.scale(
                     scale: scale,
                     child: Container(
-                      width: 120,
-                      height: 120,
+                      width: 114,
+                      height: 114,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            _phaseColor.withValues(alpha: 0.28),
-                            const Color(0xFF1E1E24),
-                          ],
-                        ),
+                        color: const Color(0xFF16161A),
                         border: Border.all(
-                          color: _phaseColor.withValues(alpha: 0.8),
-                          width: 2.5,
+                          color: _phaseColor.withValues(alpha: 0.7),
+                          width: 2.0,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: _phaseColor.withValues(alpha: 0.4),
-                            blurRadius: 18,
-                            spreadRadius: 2,
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -466,26 +453,21 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                       Text(
                         "$_secondsLeftInPhase",
                         style: TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 36,
+                          fontWeight: FontWeight.w700,
                           color: _phaseColor,
                           height: 1.0,
-                          shadows: [
-                            Shadow(
-                              color: _phaseColor.withValues(alpha: 0.6),
-                              blurRadius: 12,
-                            ),
-                          ],
+                          fontFamily: 'monospace',
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       Text(
                         _phaseTitle,
                         style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: Colors.white,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.6,
+                          color: Color(0xFFFAFAFA),
                         ),
                       ),
                     ],
@@ -496,43 +478,43 @@ class _SosCravingDialogState extends State<SosCravingDialog>
           },
         ),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
         // Subtitlu fază de respirație
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 240),
           child: Text(
             _phaseSubtitle,
             key: ValueKey<String>(_phaseSubtitle),
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
+              color: Color(0xFFA1A1AA),
+              fontSize: 13,
+              fontStyle: FontStyle.normal,
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Indicator cicluri (Ciclul X din 4)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.refresh_rounded, size: 16, color: Colors.white38),
-            const SizedBox(width: 6),
+            const Icon(Icons.refresh_rounded, size: 14, color: Color(0xFF71717A)),
+            const SizedBox(width: 5),
             Text(
               "Ciclul $_currentCycle din $_targetCycles",
               style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                color: Color(0xFF71717A),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
 
         // Card cu sfat anti-craving / personalizat AI
         GestureDetector(
@@ -547,13 +529,11 @@ class _SosCravingDialogState extends State<SosCravingDialog>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1B1B1E),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFF16161A),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _isAiGenerated
-                    ? const Color(0xFFBA68C8).withValues(alpha: 0.35)
-                    : Colors.white.withValues(alpha: 0.08),
-                width: 1.1,
+                color: Colors.white.withValues(alpha: 0.07),
+                width: 1.0,
               ),
             ),
             child: Column(
@@ -568,23 +548,19 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                           _isAiGenerated
                               ? Icons.auto_awesome_rounded
                               : Icons.lightbulb_outline_rounded,
-                          color: _isAiGenerated
-                              ? const Color(0xFFCE93D8)
-                              : const Color(0xFFFFB74D),
-                          size: 15,
+                          color: const Color(0xFFA1A1AA),
+                          size: 13,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           _isAiGenerated
                               ? "SFAT PERSONALIZAT PROGRES (AI)"
                               : "SFAT ANTI-CRAVING",
-                          style: TextStyle(
-                            color: _isAiGenerated
-                                ? const Color(0xFFCE93D8)
-                                : const Color(0xFFFFB74D),
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.6,
+                          style: const TextStyle(
+                            color: Color(0xFFA1A1AA),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.8,
                           ),
                         ),
                       ],
@@ -593,24 +569,24 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                       Text(
                         "${_currentTipIndex + 1}/${_cravingTips.length}",
                         style: const TextStyle(
-                          color: Colors.white38,
+                          color: Color(0xFF71717A),
                           fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 280),
+                  duration: const Duration(milliseconds: 240),
                   child: Text(
                     _cravingTips[_currentTipIndex],
                     key: ValueKey<String>(
                         "tip_${_currentTipIndex}_${_cravingTips[_currentTipIndex]}"),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFE4E4E7),
                       fontSize: 12.5,
-                      height: 1.4,
+                      height: 1.45,
                     ),
                   ),
                 ),
@@ -619,7 +595,7 @@ class _SosCravingDialogState extends State<SosCravingDialog>
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
         // Butoane de acțiune
         Row(
@@ -631,23 +607,28 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                 onPressed: _togglePause,
                 icon: Icon(
                   _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                  size: 20,
-                  color: Colors.white70,
+                  size: 16,
+                  color: const Color(0xFFD4D4D8),
                 ),
                 label: Text(
                   _isPaused ? "Reia" : "Pauză",
-                  style: const TextStyle(color: Colors.white70),
+                  style: const TextStyle(
+                    color: Color(0xFFD4D4D8),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white24),
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  backgroundColor: const Color(0xFF16161A),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
 
             // Buton "Mă simt mai bine" (Ieșire victorie)
             Expanded(
@@ -659,19 +640,20 @@ class _SosCravingDialogState extends State<SosCravingDialog>
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B0000),
+                  backgroundColor: const Color(0xFFE11D48),
                   foregroundColor: Colors.white,
-                  elevation: 6,
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: const Text(
                   "Am depășit pofta! 🎉",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
@@ -687,62 +669,62 @@ class _SosCravingDialogState extends State<SosCravingDialog>
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.greenAccent.withValues(alpha: 0.15),
+            color: const Color(0xFF10B981).withValues(alpha: 0.12),
             shape: BoxShape.circle,
             border: Border.all(
-              color: Colors.greenAccent.withValues(alpha: 0.5),
-              width: 1.5,
+              color: const Color(0xFF10B981).withValues(alpha: 0.3),
+              width: 1.0,
             ),
           ),
           child: const Icon(
-            Icons.verified_rounded,
-            size: 64,
-            color: Colors.greenAccent,
+            Icons.check_rounded,
+            size: 38,
+            color: Color(0xFF34D399),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
         const Text(
           "Victorie Împotriva Poftei!",
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+            color: Color(0xFFFAFAFA),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         const Text(
-          "Ai rezistat impulsului de moment. Fiecare victorie te face mai puternic și mai sănătos. Continuă să-ți păstrezi controlul!",
+          "Ai rezistat impulsului de moment. Fiecare craving depășit recalibrează circuitele neuronale spre autonomie completă.",
           style: TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
+            color: Color(0xFFA1A1AA),
+            fontSize: 13,
             height: 1.45,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 22),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 44,
           child: ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B0000),
+              backgroundColor: const Color(0xFFE11D48),
               foregroundColor: Colors.white,
-              elevation: 6,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: const Text(
               "CONTINUĂ CU FORȚE PROASPETE",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 1.0,
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                letterSpacing: 0.8,
               ),
             ),
           ),
@@ -759,19 +741,22 @@ class _SosCravingDialogState extends State<SosCravingDialog>
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 9),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF8B0000) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? const Color(0xFF27272A) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? Border.all(color: Colors.white.withValues(alpha: 0.1), width: 0.8)
+              : null,
         ),
         child: Text(
           title,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white60,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            fontSize: 12.5,
+            color: isSelected ? const Color(0xFFFAFAFA) : const Color(0xFF71717A),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 12,
           ),
         ),
       ),
