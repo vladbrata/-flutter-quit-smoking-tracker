@@ -13,6 +13,7 @@ import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
 import 'package:flutter_quit_smoking/widgets/health_progress_card.dart';
 import 'package:flutter_quit_smoking/widgets/mini_goal_widget.dart';
 import 'package:flutter_quit_smoking/widgets/question_dialog.dart';
+import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
 import 'package:flutter_quit_smoking/widgets/sos_craving_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +43,12 @@ class _CounterPageState extends State<CounterPage> {
   Goal? _selectedGoal;
   bool _isStarted = false;
 
+  // Stări de încărcare pentru fiecare container (Skeleton Loading progresiv)
+  bool _isGoalLoading = true;
+  bool _isTimerLoading = true;
+  bool _isStatsLoading = true;
+  bool _isHealthLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -61,23 +68,36 @@ class _CounterPageState extends State<CounterPage> {
   }
 
   void _loadSavedData() async {
+    // 1. Inițiem sincronizarea din Firestore în fundal (non-blocantă)
     final user = authServices.value.currentUser;
     if (user != null) {
-      await databaseService.syncFromFirestoreToLocal(user.uid);
       _userName = user.displayName ?? '';
       _userEmail = user.email ?? '';
+      databaseService.syncFromFirestoreToLocal(user.uid).then((_) async {
+        if (!mounted) return;
+        final p = await SharedPreferences.getInstance();
+        final n = p.getString('user_name');
+        final e = p.getString('user_email');
+        if (mounted && (n != null || e != null)) {
+          setState(() {
+            if (n != null && n.isNotEmpty) _userName = n;
+            if (e != null && e.isNotEmpty) _userEmail = e;
+          });
+        }
+      });
     }
 
+    // 2. Citim din stocarea locală SharedPreferences rapid
     final prefs = await SharedPreferences.getInstance();
-    String? startTimeStr = prefs.getString('start_time');
-    double? savedDailyCost = prefs.getDouble('daily_cost');
-    double? savedPackPrice = prefs.getDouble('pack_price');
-    int? savedCigs = prefs.getInt('cigarettes_per_day');
-    double? savedPacks = prefs.getDouble('packs_per_day');
-    String? savedGoalStr = prefs.getString('selected_goal');
-    String? savedName = prefs.getString('user_name');
-    String? savedEmail = prefs.getString('user_email');
-    String? savedRoutine = prefs.getString('smoking_routine');
+    final String? startTimeStr = prefs.getString('start_time');
+    final double? savedDailyCost = prefs.getDouble('daily_cost');
+    final double? savedPackPrice = prefs.getDouble('pack_price');
+    final int? savedCigs = prefs.getInt('cigarettes_per_day');
+    final double? savedPacks = prefs.getDouble('packs_per_day');
+    final String? savedGoalStr = prefs.getString('selected_goal');
+    final String? savedName = prefs.getString('user_name');
+    final String? savedEmail = prefs.getString('user_email');
+    final String? savedRoutine = prefs.getString('smoking_routine');
 
     if (savedName != null && savedName.isNotEmpty) _userName = savedName;
     if (savedEmail != null && savedEmail.isNotEmpty) _userEmail = savedEmail;
@@ -86,29 +106,66 @@ class _CounterPageState extends State<CounterPage> {
     if (savedPacks != null) _packsPerDay = savedPacks;
     if (savedRoutine != null && savedRoutine.isNotEmpty) _smokingRoutine = savedRoutine;
 
+    // Dacă utilizatorul nu are încă setată o dată de start sau costuri, deschidem dialogul
+    if (startTimeStr == null || savedDailyCost == null || savedDailyCost <= 0) {
+      if (!mounted) return;
+      setState(() {
+        _isGoalLoading = false;
+        _isTimerLoading = false;
+        _isStatsLoading = false;
+        _isHealthLoading = false;
+      });
+      _showSetupDialog();
+      return;
+    }
+
+    final DateTime startTime = DateTime.parse(startTimeStr);
+    final double dailyCost = savedDailyCost;
+    final double costPerSec = dailyCost / 86400;
+
+    // --- ETAPA 1: CRONOMETRUL TIMP FĂRĂ FUMAT ---
+    // Se deblochează primul pentru a oferi confirmare vizuală instantanee
+    await Future.delayed(const Duration(milliseconds: 140));
+    if (!mounted) return;
+    setState(() {
+      _dailyCost = dailyCost;
+      _costPerSecunda = costPerSec;
+      _secundeScurse = DateTime.now().difference(startTime).inSeconds;
+      _isStarted = true;
+      _isTimerLoading = false;
+    });
+    _startTimer();
+
+    // --- ETAPA 2: STATISTICI (Economii & Țigări Evitate) ---
+    // Se populează al doilea container
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
+    setState(() {
+      _baniEconomisiti = _secundeScurse * _costPerSecunda;
+      _tigariEvitate = ((_secundeScurse / 86400.0) * _cigarettesPerDay).floor();
+      _isStatsLoading = false;
+    });
+
+    // --- ETAPA 3: CONTAINER SĂNĂTATE (Plămânii din Roadmap) ---
+    // Se populează al treilea container
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
+    setState(() {
+      _isHealthLoading = false;
+    });
+
+    // --- ETAPA 4: CARD OBIECTIV ACTIV ---
+    // Se populează ultimul container
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
     if (savedGoalStr != null) {
       try {
         _selectedGoal = Goal.fromMap(jsonDecode(savedGoalStr));
       } catch (_) {}
     }
-
-    if (startTimeStr != null && savedDailyCost != null && savedDailyCost > 0) {
-      if (!mounted) return;
-      setState(() {
-        DateTime startTime = DateTime.parse(startTimeStr);
-        _dailyCost = savedDailyCost;
-        _costPerSecunda = _dailyCost / 86400;
-
-        _secundeScurse = DateTime.now().difference(startTime).inSeconds;
-        _baniEconomisiti = _secundeScurse * _costPerSecunda;
-        _tigariEvitate = ((_secundeScurse / 86400.0) * _cigarettesPerDay).floor();
-        _isStarted = true;
-      });
-      _startTimer();
-    } else {
-      if (!mounted) return;
-      _showSetupDialog();
-    }
+    setState(() {
+      _isGoalLoading = false;
+    });
   }
 
   void _showSetupDialog() async {
@@ -141,6 +198,10 @@ class _CounterPageState extends State<CounterPage> {
         _secundeScurse = 0;
         _baniEconomisiti = 0.0;
         _tigariEvitate = 0;
+        _isGoalLoading = false;
+        _isTimerLoading = false;
+        _isStatsLoading = false;
+        _isHealthLoading = false;
       });
 
       _saveQuitData(
@@ -356,6 +417,10 @@ class _CounterPageState extends State<CounterPage> {
       _isStarted = false;
       _baniEconomisiti = 0;
       _tigariEvitate = 0;
+      _isGoalLoading = true;
+      _isTimerLoading = true;
+      _isStatsLoading = true;
+      _isHealthLoading = true;
     });
 
     if (!mounted) return;
@@ -621,57 +686,87 @@ class _CounterPageState extends State<CounterPage> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 550),
-            child: _isStarted
-                ? SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Cardul Obiectiv Activ
-                        _buildGoalSection(),
-                        const SizedBox(height: 16),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Cardul Obiectiv Activ (Skeleton sau Conținut)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: _isGoalLoading
+                        ? const SkeletonGoalCard(key: ValueKey('sk_goal'))
+                        : KeyedSubtree(
+                            key: const ValueKey('loaded_goal'),
+                            child: _buildGoalSection(),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
 
-                        // Hero Stat Card: Timp Fără Fumat
-                        _buildTimerCard(),
-                        const SizedBox(height: 16),
+                  // Hero Stat Card: Timp Fără Fumat (Skeleton sau Conținut)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: _isTimerLoading
+                        ? const SkeletonTimerCard(key: ValueKey('sk_timer'))
+                        : KeyedSubtree(
+                            key: const ValueKey('loaded_timer'),
+                            child: _buildTimerCard(),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
 
-                        // Grid 2 Coloane: Economii și Țigări Evitate
-                        _buildStatsGrid(),
-                        const SizedBox(height: 16),
+                  // Grid 2 Coloane: Economii și Țigări Evitate (Skeleton sau Conținut)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: _isStatsLoading
+                        ? const SkeletonStatsGrid(key: ValueKey('sk_stats'))
+                        : KeyedSubtree(
+                            key: const ValueKey('loaded_stats'),
+                            child: _buildStatsGrid(),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
 
-                        // Container Progres Sănătate (Plămâni interactivi din Roadmap)
-                        HealthProgressCard(
-                          timeElapsed: Duration(seconds: _secundeScurse),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Buton SOS Craving Card
-                        _buildSosLifelineCard(),
-                        const SizedBox(height: 16),
-
-                        // Butoane Navigare Rapidă
-                        _buildQuickNavigationRow(),
-                        const SizedBox(height: 24),
-
-                        // Buton Reset Progresie
-                        Center(
-                          child: TextButton.icon(
-                            onPressed: _confirmResetProgression,
-                            icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white38),
-                            label: const Text(
-                              "Am fumat o țigară (resetează progresul)",
-                              style: TextStyle(color: Colors.white38, fontSize: 12.5),
+                  // Container Progres Sănătate (Plămâni interactivi din Roadmap)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: _isHealthLoading
+                        ? const SkeletonHealthCard(key: ValueKey('sk_health'))
+                        : KeyedSubtree(
+                            key: const ValueKey('loaded_health'),
+                            child: HealthProgressCard(
+                              timeElapsed: Duration(seconds: _secundeScurse),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  )
-                : const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF8B0000)),
                   ),
+                  const SizedBox(height: 16),
+
+                  // Buton SOS Craving Card
+                  _buildSosLifelineCard(),
+                  const SizedBox(height: 16),
+
+                  // Butoane Navigare Rapidă
+                  _buildQuickNavigationRow(),
+                  const SizedBox(height: 24),
+
+                  // Buton Reset Progresie
+                  if (_isStarted) ...[
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: _confirmResetProgression,
+                        icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white38),
+                        label: const Text(
+                          "Am fumat o țigară (resetează progresul)",
+                          style: TextStyle(color: Colors.white38, fontSize: 12.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
