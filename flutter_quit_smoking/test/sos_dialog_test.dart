@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_quit_smoking/widgets/sos_craving_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('SosCravingDialog renders properly and switches techniques and victory view',
       (WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 900);
@@ -49,5 +56,37 @@ void main() {
     // Verifică vizualizarea de succes
     expect(find.text('Victorie Împotriva Poftei!'), findsOneWidget);
     expect(find.text('CONTINUĂ CU FORȚE PROASPETE'), findsOneWidget);
+  });
+
+  testWidgets('SosCravingDialog renders with personalized progress parameters',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SosCravingDialog(
+            timeElapsed: Duration(days: 2, hours: 3),
+            cigarettesAvoided: 45,
+            moneySaved: 55.0,
+            smokingRoutine: "La cafea dimineața",
+            nextMilestone: "Monoxidul de carbon se normalizează",
+          ),
+        ),
+      ),
+    );
+
+    // Permite execuția apelului asincron de sfaturi
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('SOS CRAVING'), findsOneWidget);
+    expect(find.text('SFAT PERSONALIZAT PROGRES (AI)'), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
   });
 }

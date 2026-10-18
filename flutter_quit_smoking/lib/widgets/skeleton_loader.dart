@@ -310,10 +310,56 @@ class SkeletonPageLoading extends StatelessWidget {
                   SkeletonStatsGrid(),
                   SizedBox(height: 16),
                   SkeletonHealthCard(),
+                  SizedBox(height: 16),
+                  SkeletonAiAdviceCard(),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Schelet pentru cardul cu sfatul inteligent AI (Gemini)
+class SkeletonAiAdviceCard extends StatelessWidget {
+  const SkeletonAiAdviceCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonShimmer(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF151518),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    SkeletonBox(width: 22, height: 22, borderRadius: 11),
+                    SizedBox(width: 8),
+                    SkeletonBox(width: 130, height: 11, borderRadius: 5),
+                  ],
+                ),
+                SkeletonBox(width: 85, height: 22, borderRadius: 11),
+              ],
+            ),
+            SizedBox(height: 14),
+            SkeletonBox(width: double.infinity, height: 13, borderRadius: 5),
+            SizedBox(height: 8),
+            SkeletonBox(width: 280, height: 13, borderRadius: 5),
+            SizedBox(height: 8),
+            SkeletonBox(width: 190, height: 11, borderRadius: 5),
+          ],
         ),
       ),
     );

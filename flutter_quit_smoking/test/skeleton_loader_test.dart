@@ -72,6 +72,21 @@ void main() {
       expect(find.byType(SkeletonTimerCard), findsOneWidget);
       expect(find.byType(SkeletonStatsGrid), findsOneWidget);
       expect(find.byType(SkeletonHealthCard), findsOneWidget);
+      expect(find.byType(SkeletonAiAdviceCard), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 300));
+    });
+
+    testWidgets('renders SkeletonAiAdviceCard with shimmer', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SkeletonAiAdviceCard(),
+          ),
+        ),
+      );
+
+      expect(find.byType(SkeletonAiAdviceCard), findsOneWidget);
+      expect(find.byType(SkeletonShimmer), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 300));
     });
 

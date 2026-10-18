@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/services/gemini_service.dart';
 
 enum BreathingTechnique {
   boxBreathing, // 4-4-4-4
@@ -14,7 +15,20 @@ enum BreathingPhase {
 }
 
 class SosCravingDialog extends StatefulWidget {
-  const SosCravingDialog({super.key});
+  final Duration? timeElapsed;
+  final int? cigarettesAvoided;
+  final double? moneySaved;
+  final String? smokingRoutine;
+  final String? nextMilestone;
+
+  const SosCravingDialog({
+    super.key,
+    this.timeElapsed,
+    this.cigarettesAvoided,
+    this.moneySaved,
+    this.smokingRoutine,
+    this.nextMilestone,
+  });
 
   @override
   State<SosCravingDialog> createState() => _SosCravingDialogState();
@@ -36,13 +50,14 @@ class _SosCravingDialogState extends State<SosCravingDialog>
   bool _isCompleted = false;
   bool _isPaused = false;
 
-  final List<String> _cravingTips = [
+  List<String> _cravingTips = [
     "Un craving fizic intens atinge vârful în circa 3 minute, după care scade treptat.",
     "Bea un pahar plin cu apă rece. Îți resetează atenția și hidratează corpul.",
     "Schimbă mediul fizic în care te afli pentru 5 minute (ieși la aer sau mergi într-o altă cameră).",
     "Fiecare poftă refuzată reconfigurează căile neuronale spre libertate completă.",
   ];
   int _currentTipIndex = 0;
+  bool _isAiGenerated = false;
 
   @override
   void initState() {
@@ -57,6 +72,26 @@ class _SosCravingDialogState extends State<SosCravingDialog>
     );
 
     _startPhase(BreathingPhase.inhale);
+    _loadPersonalizedTips();
+  }
+
+  void _loadPersonalizedTips() async {
+    try {
+      final tips = await geminiService.getCravingTips(
+        timeElapsed: widget.timeElapsed ?? Duration.zero,
+        cigarettesAvoided: widget.cigarettesAvoided ?? 0,
+        moneySaved: widget.moneySaved ?? 0.0,
+        routine: widget.smokingRoutine ?? '',
+        nextMilestone: widget.nextMilestone ?? '',
+      );
+      if (mounted && tips.isNotEmpty) {
+        setState(() {
+          _cravingTips = tips;
+          _currentTipIndex = 0;
+          _isAiGenerated = true;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -499,35 +534,88 @@ class _SosCravingDialogState extends State<SosCravingDialog>
 
         const SizedBox(height: 18),
 
-        // Card cu sfat anti-craving
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1B1B1E),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.lightbulb_outline_rounded,
-                color: Color(0xFFFFB74D),
-                size: 20,
+        // Card cu sfat anti-craving / personalizat AI
+        GestureDetector(
+          onTap: () {
+            if (_cravingTips.length > 1) {
+              setState(() {
+                _currentTipIndex = (_currentTipIndex + 1) % _cravingTips.length;
+              });
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B1B1E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _isAiGenerated
+                    ? const Color(0xFFBA68C8).withValues(alpha: 0.35)
+                    : Colors.white.withValues(alpha: 0.08),
+                width: 1.1,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _cravingTips[_currentTipIndex],
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12.5,
-                    height: 1.35,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          _isAiGenerated
+                              ? Icons.auto_awesome_rounded
+                              : Icons.lightbulb_outline_rounded,
+                          color: _isAiGenerated
+                              ? const Color(0xFFCE93D8)
+                              : const Color(0xFFFFB74D),
+                          size: 15,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isAiGenerated
+                              ? "SFAT PERSONALIZAT PROGRES (AI)"
+                              : "SFAT ANTI-CRAVING",
+                          style: TextStyle(
+                            color: _isAiGenerated
+                                ? const Color(0xFFCE93D8)
+                                : const Color(0xFFFFB74D),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_cravingTips.length > 1)
+                      Text(
+                        "${_currentTipIndex + 1}/${_cravingTips.length}",
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  child: Text(
+                    _cravingTips[_currentTipIndex],
+                    key: ValueKey<String>(
+                        "tip_${_currentTipIndex}_${_cravingTips[_currentTipIndex]}"),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      height: 1.4,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 

@@ -4,12 +4,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/auth_layout.dart';
 import 'package:flutter_quit_smoking/pages/goals_page.dart';
+import 'package:flutter_quit_smoking/pages/models/health_milestone_model.dart';
 import 'package:flutter_quit_smoking/pages/roadmap_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/services/auth_services.dart';
 import 'package:flutter_quit_smoking/services/database_service.dart';
+import 'package:flutter_quit_smoking/services/gemini_service.dart';
 import 'package:flutter_quit_smoking/widgets/add_goal_widget_dialog.dart';
 import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
+import 'package:flutter_quit_smoking/widgets/ai_routine_advice_card.dart';
 import 'package:flutter_quit_smoking/widgets/health_progress_card.dart';
 import 'package:flutter_quit_smoking/widgets/mini_goal_widget.dart';
 import 'package:flutter_quit_smoking/widgets/question_dialog.dart';
@@ -48,6 +51,7 @@ class _CounterPageState extends State<CounterPage> {
   bool _isTimerLoading = true;
   bool _isStatsLoading = true;
   bool _isHealthLoading = true;
+  bool _isAiAdviceLoading = true;
 
   @override
   void initState() {
@@ -114,6 +118,7 @@ class _CounterPageState extends State<CounterPage> {
         _isTimerLoading = false;
         _isStatsLoading = false;
         _isHealthLoading = false;
+        _isAiAdviceLoading = false;
       });
       _showSetupDialog();
       return;
@@ -154,7 +159,15 @@ class _CounterPageState extends State<CounterPage> {
       _isHealthLoading = false;
     });
 
-    // --- ETAPA 4: CARD OBIECTIV ACTIV ---
+    // --- ETAPA 4: SFATURI INTELIGENTE RUTINĂ (Gemini AI) ---
+    // Se populează al patrulea container
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
+    setState(() {
+      _isAiAdviceLoading = false;
+    });
+
+    // --- ETAPA 5: CARD OBIECTIV ACTIV ---
     // Se populează ultimul container
     await Future.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
@@ -521,10 +534,116 @@ class _CounterPageState extends State<CounterPage> {
   }
 
   void _openSosCravingDialog() {
+    final nextMs = HealthMilestoneService.getNextMilestone(Duration(seconds: _secundeScurse));
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => const SosCravingDialog(),
+      builder: (context) => SosCravingDialog(
+        timeElapsed: Duration(seconds: _secundeScurse),
+        cigarettesAvoided: _tigariEvitate,
+        moneySaved: _baniEconomisiti,
+        smokingRoutine: _smokingRoutine,
+        nextMilestone: nextMs?.title ?? '',
+      ),
+    );
+  }
+
+  void _showApiKeyDialog() async {
+    final currentKey = await geminiService.getApiKey() ?? '';
+    final controller = TextEditingController(text: currentKey);
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E1E24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: const [
+              Icon(Icons.auto_awesome_rounded, color: Color(0xFFBA68C8), size: 22),
+              SizedBox(width: 8),
+              Text(
+                "Cheie Gemini API",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Introdu cheia ta API Google Gemini pentru generarea dinamică a sfaturilor personalizate. Este salvată doar pe dispozitivul tău.",
+                style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: "AIzaSy...",
+                  hintStyle: const TextStyle(color: Colors.white30),
+                  filled: true,
+                  fillColor: Colors.black26,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFBA68C8)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Notă: Aplicația funcționează perfect și fără cheie, folosind motorul inteligent de fallback local.",
+                style: TextStyle(
+                  color: Colors.white38,
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            if (currentKey.isNotEmpty)
+              TextButton(
+                onPressed: () async {
+                  await geminiService.clearApiKey();
+                  if (dialogCtx.mounted) Navigator.pop(dialogCtx);
+                  setState(() {});
+                },
+                child: const Text("Șterge", style: TextStyle(color: Colors.redAccent)),
+              ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text("Anulează", style: TextStyle(color: Colors.white60)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await geminiService.setApiKey(controller.text);
+                if (dialogCtx.mounted) Navigator.pop(dialogCtx);
+                setState(() {});
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B0000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                "Salvează",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -634,10 +753,20 @@ class _CounterPageState extends State<CounterPage> {
               ListTile(
                 leading: const Icon(Icons.tune, color: Colors.grey),
                 title: const Text("Editează Obiceiuri Fumat", style: TextStyle(color: Colors.white)),
-                subtitle: const Text("Schimbă preț pachet și țigări/zi", style: TextStyle(color: Colors.white38, fontSize: 11)),
+                subtitle: const Text("Schimbă preț pachet, țigări/zi și rutină", style: TextStyle(color: Colors.white38, fontSize: 11)),
                 onTap: () {
                   Navigator.pop(context);
                   _editSmokingHabits();
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.auto_awesome_rounded, color: Color(0xFFBA68C8)),
+                title: const Text("Cheie Gemini API (Opțional)", style: TextStyle(color: Colors.white)),
+                subtitle: const Text("Pentru sfaturi generate dinamic cu AI", style: TextStyle(color: Colors.white38, fontSize: 11)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showApiKeyDialog();
                 },
               ),
 
@@ -737,6 +866,24 @@ class _CounterPageState extends State<CounterPage> {
                             key: const ValueKey('loaded_health'),
                             child: HealthProgressCard(
                               timeElapsed: Duration(seconds: _secundeScurse),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Sfat Inteligent Personalizat Rutină (Gemini AI)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: _isAiAdviceLoading
+                        ? const SkeletonAiAdviceCard(key: ValueKey('sk_ai_advice'))
+                        : KeyedSubtree(
+                            key: const ValueKey('loaded_ai_advice'),
+                            child: AiRoutineAdviceCard(
+                              routine: _smokingRoutine,
+                              timeElapsed: Duration(seconds: _secundeScurse),
+                              cigarettesAvoided: _tigariEvitate,
+                              moneySaved: _baniEconomisiti,
+                              onConfigureRoutine: _editSmokingHabits,
                             ),
                           ),
                   ),
