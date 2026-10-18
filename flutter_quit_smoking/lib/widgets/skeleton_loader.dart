@@ -284,3 +284,109 @@ class SkeletonHealthCard extends StatelessWidget {
     );
   }
 }
+
+/// Schelet pentru un ecran complet (folosit la pornirea aplicației în AuthLayout)
+class SkeletonPageLoading extends StatelessWidget {
+  const SkeletonPageLoading({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 550),
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: const [
+                  SkeletonGoalCard(),
+                  SizedBox(height: 16),
+                  SkeletonTimerCard(),
+                  SizedBox(height: 16),
+                  SkeletonStatsGrid(),
+                  SizedBox(height: 16),
+                  SkeletonHealthCard(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Schelet pentru ecranul de Roadmap (Traseu Sănătate)
+class SkeletonRoadmapView extends StatelessWidget {
+  const SkeletonRoadmapView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            const SkeletonHealthCard(),
+            const SizedBox(height: 24),
+            for (int i = 0; i < 4; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: SkeletonShimmer(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SkeletonBox(width: 26, height: 26, borderRadius: 13),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            SkeletonBox(width: 120, height: 16, borderRadius: 6),
+                            SizedBox(height: 8),
+                            SkeletonBox(width: 240, height: 12, borderRadius: 4),
+                            SizedBox(height: 6),
+                            SkeletonBox(width: 180, height: 12, borderRadius: 4),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Schelet pentru lista de obiective (GoalsPage și Dialog Obiective)
+class SkeletonGoalList extends StatelessWidget {
+  final int itemCount;
+
+  const SkeletonGoalList({super.key, this.itemCount = 3});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemBuilder: (context, index) {
+        return const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: SkeletonGoalCard(),
+        );
+      },
+    );
+  }
+}
+

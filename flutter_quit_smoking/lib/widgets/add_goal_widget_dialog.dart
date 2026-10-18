@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_quit_smoking/widgets/goal_container_widget.dart';
+import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
 
 class AddGoalWidgetDialog extends StatefulWidget {
   final Goal? selectedGoal;
@@ -77,7 +78,7 @@ class _AddGoalWidgetDialogState extends State<AddGoalWidgetDialog> {
               ),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const SkeletonGoalList(itemCount: 2)
                   : myGoals.isEmpty
                   ? const Center(child: Text("No goals found."))
                   : ListView.builder(

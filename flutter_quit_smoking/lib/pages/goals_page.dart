@@ -7,6 +7,7 @@ import 'package:flutter_quit_smoking/services/auth_services.dart';
 import 'package:flutter_quit_smoking/services/database_service.dart';
 import 'package:flutter_quit_smoking/widgets/add_goals_question_dialog.dart';
 import 'package:flutter_quit_smoking/widgets/goal_container_widget.dart';
+import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoalsPage extends StatefulWidget {
@@ -76,7 +77,12 @@ class _GoalsPageState extends State<GoalsPage> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF8B0000)))
+          ? Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: const SkeletonGoalList(itemCount: 4),
+              ),
+            )
           : Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quit_smoking/pages/models/health_milestone_model.dart';
 import 'package:flutter_quit_smoking/widgets/lungs_progress_widget.dart';
+import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Alias pentru compatibilitate
@@ -75,7 +76,7 @@ class _RoadmapPageState extends State<RoadmapPage> {
         elevation: 0,
       ),
       body: _startTime == null
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF00E5FF)))
+          ? const SkeletonRoadmapView()
           : Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),

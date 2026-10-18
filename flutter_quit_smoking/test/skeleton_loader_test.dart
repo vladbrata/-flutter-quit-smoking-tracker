@@ -59,5 +59,48 @@ void main() {
       expect(find.byType(SkeletonShimmer), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 300));
     });
+
+    testWidgets('renders SkeletonPageLoading with full page placeholders', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SkeletonPageLoading(),
+        ),
+      );
+
+      expect(find.byType(SkeletonPageLoading), findsOneWidget);
+      expect(find.byType(SkeletonGoalCard), findsOneWidget);
+      expect(find.byType(SkeletonTimerCard), findsOneWidget);
+      expect(find.byType(SkeletonStatsGrid), findsOneWidget);
+      expect(find.byType(SkeletonHealthCard), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 300));
+    });
+
+    testWidgets('renders SkeletonRoadmapView with header and milestone nodes', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SkeletonRoadmapView(),
+          ),
+        ),
+      );
+
+      expect(find.byType(SkeletonRoadmapView), findsOneWidget);
+      expect(find.byType(SkeletonHealthCard), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 300));
+    });
+
+    testWidgets('renders SkeletonGoalList with given item count', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SkeletonGoalList(itemCount: 3),
+          ),
+        ),
+      );
+
+      expect(find.byType(SkeletonGoalList), findsOneWidget);
+      expect(find.byType(SkeletonGoalCard), findsNWidgets(3));
+      await tester.pump(const Duration(milliseconds: 300));
+    });
   });
 }

@@ -4,6 +4,7 @@ import 'package:flutter_quit_smoking/pages/login_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/services/auth_services.dart';
 import 'package:flutter_quit_smoking/services/database_service.dart';
+import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthLayout extends StatelessWidget {
@@ -38,12 +39,7 @@ class AuthLayout extends StatelessWidget {
           stream: auth.authStateChanges,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                backgroundColor: Colors.black,
-                body: Center(
-                  child: CircularProgressIndicator(color: Color(0xFF8B0000)),
-                ),
-              );
+              return const SkeletonPageLoading();
             }
 
             if (snapshot.hasData && snapshot.data != null) {
@@ -52,12 +48,7 @@ class AuthLayout extends StatelessWidget {
                 future: _hasStartedQuit(user.uid),
                 builder: (context, quitSnapshot) {
                   if (quitSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold(
-                      backgroundColor: Colors.black,
-                      body: Center(
-                        child: CircularProgressIndicator(color: Color(0xFF8B0000)),
-                      ),
-                    );
+                    return const SkeletonPageLoading();
                   }
 
                   if (quitSnapshot.data == true) {
