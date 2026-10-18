@@ -5,22 +5,10 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -49,6 +37,15 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBJQYVerwW7SKHbagXHt6HUP8kKayxx6YQ',
+    appId: '1:814203782361:web:5d2cc606034f0179deaac8',
+    messagingSenderId: '814203782361',
+    projectId: 'quit-smoking-tracker-f4bbb',
+    authDomain: 'quit-smoking-tracker-f4bbb.firebaseapp.com',
+    storageBucket: 'quit-smoking-tracker-f4bbb.firebasestorage.app',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBUQhgyTtQ9PWVCAlf81QU__f4kCWsWX0w',
     appId: '1:814203782361:android:a7d44f9a73e45043deaac8',
@@ -66,5 +63,4 @@ class DefaultFirebaseOptions {
     iosClientId: '814203782361-1eurk9g6650en2l9pro6ait4akm6f7tr.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterQuitSmoking',
   );
-
 }

@@ -1,64 +1,233 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quit_smoking/pages/counter_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionDialog extends StatefulWidget {
-  const QuestionDialog({Key? key}) : super(key: key);
+  final double? initialPrice;
+  final int? initialCigarettesPerDay;
+
+  const QuestionDialog({
+    super.key,
+    this.initialPrice,
+    this.initialCigarettesPerDay,
+  });
 
   @override
-  _QuestionDialogState createState() => _QuestionDialogState();
+  State<QuestionDialog> createState() => _QuestionDialogState();
 }
 
 class _QuestionDialogState extends State<QuestionDialog> {
-  void _finishSetup() async {
-    final prefs = await SharedPreferences.getInstance();
+  late TextEditingController _priceController;
+  late TextEditingController _cigarettesController;
 
-    await prefs.setBool('startedQuitting', true);
-    await prefs.setString('start_date', DateTime.now().toIso8601String());
+  double _packPrice = 0.0;
+  int _cigarettesPerDay = 20;
 
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const CounterPage()),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    _packPrice = widget.initialPrice ?? 26.0;
+    _cigarettesPerDay = widget.initialCigarettesPerDay ?? 20;
+
+    _priceController = TextEditingController(
+      text: _packPrice > 0 ? _packPrice.toStringAsFixed(2) : "",
+    );
+    _cigarettesController = TextEditingController(
+      text: _cigarettesPerDay > 0 ? _cigarettesPerDay.toString() : "",
+    );
   }
 
-  // Variabilele se declară aici
-  String inputPrice = "";
-  String inputPacks = "";
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _cigarettesController.dispose();
+    super.dispose();
+  }
+
+  double get _packsPerDay => _cigarettesPerDay / 20.0;
+  double get _dailyCost => _packsPerDay * _packPrice;
+
+  void _submit() {
+    final price = double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
+    final cigs = int.tryParse(_cigarettesController.text) ?? 0;
+
+    if (price <= 0 || cigs <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Vă rugăm să introduceți valori valide mai mari ca 0."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final double packsPerDay = cigs / 20.0;
+    final double dailyCost = packsPerDay * price;
+
+    Navigator.pop(context, {
+      'packPrice': price,
+      'cigarettesPerDay': cigs,
+      'packsPerDay': packsPerDay,
+      'dailyCost': dailyCost,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Setări inițiale", textAlign: TextAlign.center),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            keyboardType: TextInputType.number,
-            onChanged: (val) => inputPrice = val,
-            decoration: const InputDecoration(hintText: "Pack Price"),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            keyboardType: TextInputType.number,
-            onChanged: (val) => inputPacks = val,
-            decoration: const InputDecoration(hintText: "Packs per day"),
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Row(
+        children: const [
+          Icon(Icons.smoking_rooms, color: Color(0xFF8B0000)),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "Obiceiuri de fumat",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
         ],
       ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Setează datele pentru a calcula economiile și progresul tău în timp real:",
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
+            const SizedBox(height: 18),
+
+            // Preț pachet
+            const Text(
+              "Preț pachet (RON)",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: "ex: 26.50",
+                  hintStyle: TextStyle(color: Colors.white38),
+                  prefixIcon: Icon(Icons.attach_money, color: Colors.grey),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    _packPrice = double.tryParse(val.replaceAll(',', '.')) ?? 0.0;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Țigări fumate pe zi
+            const Text(
+              "Țigări fumate pe zi (bucăți)",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                controller: _cigarettesController,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: "ex: 20 (1 pachet)",
+                  hintStyle: TextStyle(color: Colors.white38),
+                  prefixIcon: Icon(Icons.numbers, color: Colors.grey),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    _cigarettesPerDay = int.tryParse(val) ?? 0;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Card rezumat estimări
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF141414),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Pachete pe zi:", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                      Text(
+                        "${_packsPerDay.toStringAsFixed(1)} pachete",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Cost zilnic estimat:", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                      Text(
+                        "${_dailyCost.toStringAsFixed(2)} RON",
+                        style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Cost lunar (30 zile):", style: TextStyle(color: Colors.white60, fontSize: 12)),
+                      Text(
+                        "${(_dailyCost * 30).toStringAsFixed(2)} RON",
+                        style: const TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       actions: [
         TextButton(
-          onPressed: () {
-            _finishSetup();
-            // Trimitem datele înapoi ca o Listă sau un Map
-            Navigator.pop(context, {
-              'price': double.tryParse(inputPrice) ?? 0.0,
-              'packs': double.tryParse(inputPacks) ?? 0.0,
-            });
-          },
-          child: const Center(child: Text("DONE")),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("ANULEAZĂ", style: TextStyle(color: Colors.grey)),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF8B0000),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          ),
+          child: const Text("SALVEAZĂ", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ],
     );

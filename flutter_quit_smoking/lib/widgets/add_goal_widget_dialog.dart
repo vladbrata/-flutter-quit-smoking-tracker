@@ -8,16 +8,17 @@ import 'package:flutter_quit_smoking/widgets/goal_container_widget.dart';
 
 class AddGoalWidgetDialog extends StatefulWidget {
   final Goal? selectedGoal;
-  const AddGoalWidgetDialog({Key? key, this.selectedGoal}) : super(key: key);
+  const AddGoalWidgetDialog({super.key, this.selectedGoal});
 
   @override
-  _AddGoalWidgetDialogState createState() => _AddGoalWidgetDialogState();
+  State<AddGoalWidgetDialog> createState() => _AddGoalWidgetDialogState();
 }
 
 class _AddGoalWidgetDialogState extends State<AddGoalWidgetDialog> {
   // Variabile
   List<Goal> myGoals = [];
   double _baniEconomisiti = 0.0;
+  double _dailyCost = 0.0;
   Timer? _timer;
   DateTime? _startTime;
   double _costPerSecond = 0;
@@ -103,6 +104,7 @@ class _AddGoalWidgetDialogState extends State<AddGoalWidgetDialog> {
                               child: GoalContainer(
                                 goal: goal,
                                 currentSavings: _baniEconomisiti,
+                                dailyCost: _dailyCost,
                                 onDelete: () {},
                               ),
                             ),
@@ -151,6 +153,7 @@ class _AddGoalWidgetDialogState extends State<AddGoalWidgetDialog> {
     if (startTimeStr != null && savedDailyCost != null) {
       setState(() {
         _startTime = DateTime.parse(startTimeStr);
+        _dailyCost = savedDailyCost;
         _costPerSecond = savedDailyCost / 86400;
       });
       _startTimer();

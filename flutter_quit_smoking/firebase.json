@@ -1,1 +1,40 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"quit-smoking-tracker-f4bbb","appId":"1:814203782361:android:a7d44f9a73e45043deaac8","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"quit-smoking-tracker-f4bbb","configurations":{"android":"1:814203782361:android:a7d44f9a73e45043deaac8","ios":"1:814203782361:ios:d3ac25e99a065a09deaac8"}}}}}}
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "quit-smoking-tracker-f4bbb",
+          "appId": "1:814203782361:android:a7d44f9a73e45043deaac8",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "quit-smoking-tracker-f4bbb",
+          "configurations": {
+            "android": "1:814203782361:android:a7d44f9a73e45043deaac8",
+            "ios": "1:814203782361:ios:d3ac25e99a065a09deaac8",
+            "web": "1:814203782361:web:5d2cc606034f0179deaac8"
+          }
+        }
+      }
+    }
+  }
+}

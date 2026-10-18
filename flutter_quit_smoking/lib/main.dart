@@ -1,19 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-// Importă paginile tale
-import 'pages/counter_page.dart';
-import 'pages/start_quit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'pages/auth_layout.dart';
 
 void main() async {
-  // Obligatoriu când avem cod async înainte de runApp
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final prefs = await SharedPreferences.getInstance();
-  // Citim starea. Dacă nu există, implicit este false.
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
@@ -26,10 +17,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Quit Smoking App',
-      theme: ThemeData.dark(),
-      // Aici se întâmplă magia:
-      home: AuthLayout(),
+      title: 'Quit Smoking Tracker',
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.unknown,
+        },
+      ),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF8B0000),
+          secondary: Colors.redAccent,
+          surface: Color(0xFF1E1E1E),
+        ),
+      ),
+      home: const AuthLayout(),
     );
   }
 }

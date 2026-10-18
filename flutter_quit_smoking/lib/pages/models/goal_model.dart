@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class Goal {
   final String name;

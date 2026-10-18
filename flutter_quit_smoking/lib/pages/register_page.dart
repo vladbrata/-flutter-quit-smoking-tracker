@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quit_smoking/pages/login_page.dart';
 import 'package:flutter_quit_smoking/pages/start_quit.dart';
 import 'package:flutter_quit_smoking/services/auth_services.dart';
+import 'package:flutter_quit_smoking/utils/password_generator.dart';
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback? onLoginTap;
@@ -15,45 +15,15 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // Use controllers to allow text input in UI
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String? errorMessage;
-
-  void register() async {
-    if (_passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _nameController.text.isEmpty) {
-      setState(() {
-        errorMessage = "Please fill in all the fields";
-      });
-      return;
-    }
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        errorMessage = "Passwords do not match";
-      });
-      return;
-    }
-    try {
-      await authServices.value.createAccount(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const StartQuit()),
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message ?? "An error occurred";
-      });
-    }
-  }
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -64,18 +34,128 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  void _generatePassword() {
+    final generated = PasswordGenerator.generatePassword(length: 14);
+    setState(() {
+      _passwordController.text = generated;
+      _confirmPasswordController.text = generated;
+      _isPasswordObscured = false;
+      _isConfirmPasswordObscured = false;
+      _errorMessage = null;
+    });
+
+    Clipboard.setData(ClipboardData(text: generated));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: const [
+            Icon(Icons.check_circle_outline, color: Colors.white),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Parolă securizată generată și copiată în clipboard!",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF2E7D32),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _copyPasswordToClipboard() {
+    if (_passwordController.text.isNotEmpty) {
+      Clipboard.setData(ClipboardData(text: _passwordController.text));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Parola a fost copiată în clipboard!"),
+          backgroundColor: const Color(0xFF8B0000),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  Future<void> _register() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      setState(() {
+        _errorMessage = "Vă rugăm să completați toate câmpurile.";
+      });
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() {
+        _errorMessage = "Parolele introduse nu coincid.";
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      setState(() {
+        _errorMessage = "Parola trebuie să aibă minim 6 caractere.";
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await authServices.value.createAccount(
+        email: email,
+        password: password,
+        name: name,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const StartQuit()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = AuthServices.getReadableErrorMessage(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Consistent with app theme
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo / Icon
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                // Logo cu accent roșu închis
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -83,110 +163,189 @@ class _RegisterPageState extends State<RegisterPage> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF8B0000).withOpacity(0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
+                        color: const Color(0xFF8B0000).withValues(alpha: 0.35),
+                        blurRadius: 24,
+                        spreadRadius: 6,
                       ),
                     ],
                   ),
                   child: const Icon(
-                    Icons.person_add_outlined,
+                    Icons.person_add_alt_1_rounded,
                     size: 60,
-                    color: Color(0xFF8B0000), // Dark Red accent
+                    color: Color(0xFF8B0000),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
 
-                // Title
+                // Titlu și subtitlu
                 const Text(
-                  "Create Account",
+                  "Creează Cont",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 32,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
+                    letterSpacing: 1.2,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 const Text(
-                  "Start your smoke-free journey today",
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
+                  "Începe astăzi călătoria spre o viață sănătoasă",
+                  style: TextStyle(color: Colors.white60, fontSize: 15),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
 
-                // Input Fields
+                // Nume complet
                 _buildTextField(
                   controller: _nameController,
-                  hint: "Full Name",
+                  hint: "Nume complet",
                   icon: Icons.person_outline,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+
+                // Email
                 _buildTextField(
                   controller: _emailController,
-                  hint: "Email Address",
+                  hint: "Adresă de email",
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 20),
-                _buildTextField(
+                const SizedBox(height: 16),
+
+                // Parolă
+                _buildPasswordField(
                   controller: _passwordController,
-                  hint: "Password",
-                  icon: Icons.lock_outline,
-                  obscure: true,
+                  hint: "Parolă",
+                  isObscured: _isPasswordObscured,
+                  onToggleObscure: () {
+                    setState(() {
+                      _isPasswordObscured = !_isPasswordObscured;
+                    });
+                  },
                 ),
-                const SizedBox(height: 20),
-                _buildTextField(
+                const SizedBox(height: 16),
+
+                // Confirmă Parolă
+                _buildPasswordField(
                   controller: _confirmPasswordController,
-                  hint: "Confirm Password",
-                  icon: Icons.lock_outline,
-                  obscure: true,
+                  hint: "Confirmă parola",
+                  isObscured: _isConfirmPasswordObscured,
+                  onToggleObscure: () {
+                    setState(() {
+                      _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
+                    });
+                  },
                 ),
+                const SizedBox(height: 12),
 
-                const SizedBox(height: 50),
-
-                // Register Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      register();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B0000),
-                      foregroundColor: Colors.white,
-                      elevation: 8,
-                      shadowColor: const Color(0xFF8B0000).withOpacity(0.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                // Buton Generare Parolă
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _generatePassword,
+                    icon: const Icon(
+                      Icons.auto_fix_high_rounded,
+                      size: 18,
+                      color: Color(0xFFFF6B6B),
+                    ),
+                    label: const Text(
+                      "Generează parolă sigură",
+                      style: TextStyle(
+                        color: Color(0xFFFF6B6B),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
                     ),
-                    child: const Text(
-                      "REGISTER",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      backgroundColor: const Color(0xFF261214),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
 
-                // Footer
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Mesaj de eroare dacă există
+                if (_errorMessage != null && _errorMessage!.isNotEmpty) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Buton Înregistrare
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _register,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8B0000),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(0xFF501010),
+                      elevation: 6,
+                      shadowColor: const Color(0xFF8B0000).withValues(alpha: 0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text(
+                            "ÎNREGISTRARE",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                // Footer către Login
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     const Text(
-                      "Already have an account? ",
-                      style: TextStyle(color: Colors.white60),
+                      "Ai deja un cont? ",
+                      style: TextStyle(color: Colors.white60, fontSize: 14),
                     ),
                     GestureDetector(
-                      onTap:
-                          widget.onLoginTap ??
+                      onTap: widget.onLoginTap ??
                           () {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const LoginPage(),
@@ -194,30 +353,29 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                           },
                       child: const Text(
-                        "Login",
+                        "Autentifică-te",
                         style: TextStyle(
-                          color: Color(0xFF8B0000),
+                          color: Color(0xFFE53935),
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Text(errorMessage ?? "", style: TextStyle(color: Colors.red)),
               ],
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
-    bool obscure = false,
     TextInputType? keyboardType,
   }) {
     return Container(
@@ -226,7 +384,7 @@ class _RegisterPageState extends State<RegisterPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             offset: const Offset(0, 4),
             blurRadius: 8,
           ),
@@ -234,19 +392,71 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       child: TextField(
         controller: controller,
-        obscureText: obscure,
         keyboardType: keyboardType,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(icon, color: Colors.grey[500]),
+          hintStyle: TextStyle(color: Colors.grey[500]),
+          prefixIcon: Icon(icon, color: Colors.grey[400]),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String hint,
+    required bool isObscured,
+    required VoidCallback onToggleObscure,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            offset: const Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isObscured,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey[500]),
+          prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[400]),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (controller.text.isNotEmpty)
+                IconButton(
+                  tooltip: "Copiază parola",
+                  icon: const Icon(Icons.copy_rounded, color: Colors.white70, size: 20),
+                  onPressed: _copyPasswordToClipboard,
+                ),
+              IconButton(
+                tooltip: isObscured ? "Afișează parola" : "Ascunde parola",
+                icon: Icon(
+                  isObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: Colors.grey[400],
+                  size: 20,
+                ),
+                onPressed: onToggleObscure,
+              ),
+            ],
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+        onChanged: (_) {
+          setState(() {});
+        },
       ),
     );
   }
