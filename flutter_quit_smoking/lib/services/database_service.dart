@@ -39,6 +39,7 @@ class DatabaseService {
       data['cigarettesPerDay'] = 0;
       data['packsPerDay'] = 0.0;
       data['dailyCost'] = 0.0;
+      data['smokingRoutine'] = '';
       data['goals'] = [];
       await docRef.set(data, SetOptions(merge: true));
     } else {
@@ -66,6 +67,7 @@ class DatabaseService {
   /// - țigări fumate pe zi
   /// - pachete pe zi
   /// - cost zilnic
+  /// - date despre când fumează de obicei (smokingRoutine)
   /// - data de debut (startTime)
   Future<void> saveQuitData({
     required String uid,
@@ -74,6 +76,7 @@ class DatabaseService {
     required int cigarettesPerDay,
     required double packsPerDay,
     required double dailyCost,
+    String? smokingRoutine,
   }) async {
     // 1. Salvare locală în SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -82,10 +85,13 @@ class DatabaseService {
     await prefs.setInt('cigarettes_per_day', cigarettesPerDay);
     await prefs.setDouble('packs_per_day', packsPerDay);
     await prefs.setDouble('daily_cost', dailyCost);
+    if (smokingRoutine != null) {
+      await prefs.setString('smoking_routine', smokingRoutine.trim());
+    }
     await prefs.setBool('is_started', true);
 
     // 2. Salvare completă în Firestore
-    await _userDoc(uid).set({
+    final Map<String, dynamic> firestoreData = {
       'isStarted': true,
       'startTime': Timestamp.fromDate(startTime),
       'packPrice': packPrice,
@@ -93,30 +99,42 @@ class DatabaseService {
       'packsPerDay': packsPerDay,
       'dailyCost': dailyCost,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    };
+    if (smokingRoutine != null) {
+      firestoreData['smokingRoutine'] = smokingRoutine.trim();
+    }
+    await _userDoc(uid).set(firestoreData, SetOptions(merge: true));
   }
 
-  /// Actualizează doar obiceiurile legate de fumat (preț și țigări pe zi)
+  /// Actualizează obiceiurile legate de fumat (preț, țigări pe zi și momente de fumat)
   Future<void> updateSmokingHabits({
     required String uid,
     required double packPrice,
     required int cigarettesPerDay,
     required double packsPerDay,
     required double dailyCost,
+    String? smokingRoutine,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('pack_price', packPrice);
     await prefs.setInt('cigarettes_per_day', cigarettesPerDay);
     await prefs.setDouble('packs_per_day', packsPerDay);
     await prefs.setDouble('daily_cost', dailyCost);
+    if (smokingRoutine != null) {
+      await prefs.setString('smoking_routine', smokingRoutine.trim());
+    }
 
-    await _userDoc(uid).set({
+    final Map<String, dynamic> firestoreData = {
       'packPrice': packPrice,
       'cigarettesPerDay': cigarettesPerDay,
       'packsPerDay': packsPerDay,
       'dailyCost': dailyCost,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    };
+    if (smokingRoutine != null) {
+      firestoreData['smokingRoutine'] = smokingRoutine.trim();
+    }
+    await _userDoc(uid).set(firestoreData, SetOptions(merge: true));
   }
 
   /// Actualizează doar data/ora de început
@@ -235,6 +253,9 @@ class DatabaseService {
       }
       if (data['selectedGoal'] is Map) {
         await prefs.setString('selected_goal', jsonEncode(data['selectedGoal']));
+      }
+      if (data['smokingRoutine'] != null) {
+        await prefs.setString('smoking_routine', data['smokingRoutine'].toString());
       }
     } catch (_) {}
   }

@@ -37,6 +37,7 @@ class _CounterPageState extends State<CounterPage> {
   double _costPerSecunda = 0.0;
   double _baniEconomisiti = 0.0;
   int _tigariEvitate = 0;
+  String _smokingRoutine = '';
 
   Goal? _selectedGoal;
   bool _isStarted = false;
@@ -76,12 +77,14 @@ class _CounterPageState extends State<CounterPage> {
     String? savedGoalStr = prefs.getString('selected_goal');
     String? savedName = prefs.getString('user_name');
     String? savedEmail = prefs.getString('user_email');
+    String? savedRoutine = prefs.getString('smoking_routine');
 
     if (savedName != null && savedName.isNotEmpty) _userName = savedName;
     if (savedEmail != null && savedEmail.isNotEmpty) _userEmail = savedEmail;
     if (savedPackPrice != null) _packPrice = savedPackPrice;
     if (savedCigs != null) _cigarettesPerDay = savedCigs;
     if (savedPacks != null) _packsPerDay = savedPacks;
+    if (savedRoutine != null && savedRoutine.isNotEmpty) _smokingRoutine = savedRoutine;
 
     if (savedGoalStr != null) {
       try {
@@ -115,6 +118,7 @@ class _CounterPageState extends State<CounterPage> {
       builder: (context) => QuestionDialog(
         initialPrice: _packPrice > 0 ? _packPrice : null,
         initialCigarettesPerDay: _cigarettesPerDay > 0 ? _cigarettesPerDay : null,
+        initialSmokingRoutine: _smokingRoutine.isNotEmpty ? _smokingRoutine : null,
       ),
     );
 
@@ -124,12 +128,14 @@ class _CounterPageState extends State<CounterPage> {
       final int cigs = (result['cigarettesPerDay'] as num).toInt();
       final double packs = (result['packsPerDay'] as num).toDouble();
       final double dailyCost = (result['dailyCost'] as num).toDouble();
+      final String routine = (result['smokingRoutine'] as String?) ?? '';
 
       setState(() {
         _packPrice = price;
         _cigarettesPerDay = cigs;
         _packsPerDay = packs;
         _dailyCost = dailyCost;
+        _smokingRoutine = routine;
         _costPerSecunda = _dailyCost / 86400;
         _isStarted = true;
         _secundeScurse = 0;
@@ -143,6 +149,7 @@ class _CounterPageState extends State<CounterPage> {
         cigarettesPerDay: cigs,
         packsPerDay: packs,
         dailyCost: dailyCost,
+        smokingRoutine: routine,
       );
       _startTimer();
     }
@@ -154,6 +161,7 @@ class _CounterPageState extends State<CounterPage> {
       builder: (context) => QuestionDialog(
         initialPrice: _packPrice > 0 ? _packPrice : null,
         initialCigarettesPerDay: _cigarettesPerDay > 0 ? _cigarettesPerDay : null,
+        initialSmokingRoutine: _smokingRoutine.isNotEmpty ? _smokingRoutine : null,
       ),
     );
 
@@ -162,12 +170,14 @@ class _CounterPageState extends State<CounterPage> {
       final int cigs = (result['cigarettesPerDay'] as num).toInt();
       final double packs = (result['packsPerDay'] as num).toDouble();
       final double dailyCost = (result['dailyCost'] as num).toDouble();
+      final String routine = (result['smokingRoutine'] as String?) ?? '';
 
       setState(() {
         _packPrice = price;
         _cigarettesPerDay = cigs;
         _packsPerDay = packs;
         _dailyCost = dailyCost;
+        _smokingRoutine = routine;
         _costPerSecunda = _dailyCost / 86400;
         _baniEconomisiti = _secundeScurse * _costPerSecunda;
         _tigariEvitate = ((_secundeScurse / 86400.0) * _cigarettesPerDay).floor();
@@ -181,7 +191,11 @@ class _CounterPageState extends State<CounterPage> {
           cigarettesPerDay: cigs,
           packsPerDay: packs,
           dailyCost: dailyCost,
+          smokingRoutine: routine,
         );
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('smoking_routine', routine);
       }
 
       if (!mounted) return;
@@ -200,6 +214,7 @@ class _CounterPageState extends State<CounterPage> {
     required int cigarettesPerDay,
     required double packsPerDay,
     required double dailyCost,
+    String? smokingRoutine,
   }) async {
     final user = authServices.value.currentUser;
     if (user != null) {
@@ -210,6 +225,7 @@ class _CounterPageState extends State<CounterPage> {
         cigarettesPerDay: cigarettesPerDay,
         packsPerDay: packsPerDay,
         dailyCost: dailyCost,
+        smokingRoutine: smokingRoutine,
       );
     } else {
       final prefs = await SharedPreferences.getInstance();
@@ -218,6 +234,9 @@ class _CounterPageState extends State<CounterPage> {
       await prefs.setInt('cigarettes_per_day', cigarettesPerDay);
       await prefs.setDouble('packs_per_day', packsPerDay);
       await prefs.setDouble('daily_cost', dailyCost);
+      if (smokingRoutine != null) {
+        await prefs.setString('smoking_routine', smokingRoutine);
+      }
     }
   }
 

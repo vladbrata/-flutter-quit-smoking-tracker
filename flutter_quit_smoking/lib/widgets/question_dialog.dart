@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class QuestionDialog extends StatefulWidget {
   final double? initialPrice;
   final int? initialCigarettesPerDay;
+  final String? initialSmokingRoutine;
 
   const QuestionDialog({
     super.key,
     this.initialPrice,
     this.initialCigarettesPerDay,
+    this.initialSmokingRoutine,
   });
 
   @override
@@ -17,6 +19,7 @@ class QuestionDialog extends StatefulWidget {
 class _QuestionDialogState extends State<QuestionDialog> {
   late TextEditingController _priceController;
   late TextEditingController _cigarettesController;
+  late TextEditingController _routineController;
 
   double _packPrice = 0.0;
   int _cigarettesPerDay = 20;
@@ -33,12 +36,16 @@ class _QuestionDialogState extends State<QuestionDialog> {
     _cigarettesController = TextEditingController(
       text: _cigarettesPerDay > 0 ? _cigarettesPerDay.toString() : "",
     );
+    _routineController = TextEditingController(
+      text: widget.initialSmokingRoutine ?? "",
+    );
   }
 
   @override
   void dispose() {
     _priceController.dispose();
     _cigarettesController.dispose();
+    _routineController.dispose();
     super.dispose();
   }
 
@@ -67,6 +74,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
       'cigarettesPerDay': cigs,
       'packsPerDay': packsPerDay,
       'dailyCost': dailyCost,
+      'smokingRoutine': _routineController.text.trim(),
     });
   }
 
@@ -160,6 +168,43 @@ class _QuestionDialogState extends State<QuestionDialog> {
                     _cigarettesPerDay = int.tryParse(val) ?? 0;
                   });
                 },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Când fumezi de obicei? (Limbaj natural)
+            const Text(
+              "Când fumezi de obicei? (obiceiuri / momente)",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              "Descrie în cuvintele tale momentele zilei (la cafea, pauze, stres, după masă etc.)",
+              style: TextStyle(color: Colors.white54, fontSize: 11),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                controller: _routineController,
+                keyboardType: TextInputType.multiline,
+                minLines: 2,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                decoration: const InputDecoration(
+                  hintText: "ex: Dimineața la prima cafea, după fiecare masă, când am pauză la serviciu la 12:00 sau seara când sunt stresat...",
+                  hintStyle: TextStyle(color: Colors.white38, fontSize: 12),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Icon(Icons.schedule_rounded, color: Colors.grey),
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
