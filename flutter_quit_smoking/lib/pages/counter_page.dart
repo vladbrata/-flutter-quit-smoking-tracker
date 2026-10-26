@@ -17,6 +17,9 @@ import 'package:flutter_quit_smoking/widgets/health_progress_card.dart';
 import 'package:flutter_quit_smoking/widgets/mini_goal_widget.dart';
 import 'package:flutter_quit_smoking/widgets/question_dialog.dart';
 import 'package:flutter_quit_smoking/widgets/skeleton_loader.dart';
+import 'package:flutter_quit_smoking/widgets/relapse_capture_dialog.dart';
+import 'package:flutter_quit_smoking/widgets/craving_capture_dialog.dart';
+import 'package:flutter_quit_smoking/widgets/craving_relapse_history_dialog.dart';
 import 'package:flutter_quit_smoking/widgets/sos_craving_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,6 +48,7 @@ class _CounterPageState extends State<CounterPage> {
 
   Goal? _selectedGoal;
   bool _isStarted = false;
+  int _aiAdviceRefreshCount = 0;
 
   // Stări de încărcare pentru fiecare container (Skeleton Loading progresiv)
   bool _isGoalLoading = true;
@@ -356,6 +360,7 @@ class _CounterPageState extends State<CounterPage> {
         if (!allGoals.contains(_selectedGoal)) {
           setState(() {
             _selectedGoal = null;
+            _aiAdviceRefreshCount++;
           });
           await prefs.remove('selected_goal');
           final user = authServices.value.currentUser;
@@ -366,6 +371,7 @@ class _CounterPageState extends State<CounterPage> {
       } else {
         setState(() {
           _selectedGoal = null;
+          _aiAdviceRefreshCount++;
         });
         await prefs.remove('selected_goal');
         final user = authServices.value.currentUser;
@@ -376,40 +382,63 @@ class _CounterPageState extends State<CounterPage> {
     }
   }
 
-  void _confirmResetProgression() {
-    showDialog(
+  void _confirmResetProgression() async {
+    final RelapseResult? result = await showDialog<RelapseResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          "Ai fumat o țigară?",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
+      barrierDismissible: true,
+      builder: (context) => RelapseCaptureDialog(
+        smokeFreeDurationSeconds: _secundeScurse,
+      ),
+    );
+
+    if (result != null) {
+      final user = authServices.value.currentUser;
+
+      // 1. Salvează evenimentul de relapse în baza de date (local + cloud)
+      await databaseService.saveRelapseEvent(
+        uid: user?.uid,
+        relapse: result.relapseEvent,
+      );
+
+      // 2. În funcție de opțiunea utilizatorului:
+      if (result.restartImmediately) {
+        // Repornește imediat de la data/ora selectată
+        await _onRestartFromRelapse(result.newStartTime);
+      } else {
+        // Resetează complet progresul și navighează la ecranul de reluare
+        _resetProgression();
+      }
+    }
+  }
+
+  Future<void> _onRestartFromRelapse(DateTime newStart) async {
+    final user = authServices.value.currentUser;
+    if (user != null) {
+      await databaseService.updateStartTime(
+        uid: user.uid,
+        newStartTime: newStart,
+      );
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('start_time', newStart.toIso8601String());
+    }
+
+    final int newSeconds = DateTime.now().difference(newStart).inSeconds.clamp(0, 999999999);
+    setState(() {
+      _secundeScurse = newSeconds;
+      _baniEconomisiti = _secundeScurse * _costPerSecunda;
+      _tigariEvitate = ((_secundeScurse / 86400.0) * _cigarettesPerDay).floor();
+      _aiAdviceRefreshCount++;
+    });
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Informațiile despre relapse au fost salvate. AI-ul a învățat din acest moment!",
         ),
-        content: const Text(
-          "Nu te descuraja! Relapsul face parte uneori din proces. Cronometrul va fi resetat pentru a începe din nou cu forțe proaspete.",
-          style: TextStyle(color: Colors.white70),
-          textAlign: TextAlign.center,
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ANULEAZĂ", style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _resetProgression();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B0000),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text("RESETEAZĂ"),
-          ),
-        ],
+        backgroundColor: Color(0xFFE11D48),
+        duration: Duration(seconds: 4),
       ),
     );
   }
@@ -533,9 +562,40 @@ class _CounterPageState extends State<CounterPage> {
     });
   }
 
-  void _openSosCravingDialog() {
+  void _openSosCravingDialog({bool captureReasonFirst = true}) async {
+    String? cravingId;
+
+    if (captureReasonFirst) {
+      final captureResult = await showDialog<CravingCaptureResult>(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const CravingCaptureDialog(),
+      );
+
+      if (captureResult == null) return;
+      cravingId = captureResult.craving.id;
+
+      if (!captureResult.startBreathing) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Pofta de la ora ${captureResult.craving.formattedTime} a fost salvată în baza de date! AI-ul o va analiza.",
+            ),
+            backgroundColor: const Color(0xFFE11D48),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        setState(() {
+          _aiAdviceRefreshCount++;
+        });
+        return;
+      }
+    }
+
     final nextMs = HealthMilestoneService.getNextMilestone(Duration(seconds: _secundeScurse));
-    showDialog(
+    if (!mounted) return;
+    await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) => SosCravingDialog(
@@ -544,8 +604,23 @@ class _CounterPageState extends State<CounterPage> {
         moneySaved: _baniEconomisiti,
         smokingRoutine: _smokingRoutine,
         nextMilestone: nextMs?.title ?? '',
+        selectedGoal: _selectedGoal,
+        dailyCost: _dailyCost,
+        cravingId: cravingId,
+        onSessionFinished: () {
+          if (mounted) {
+            setState(() {
+              _aiAdviceRefreshCount++;
+            });
+          }
+        },
       ),
     );
+    if (mounted) {
+      setState(() {
+        _aiAdviceRefreshCount++;
+      });
+    }
   }
 
   void _showApiKeyDialog() async {
@@ -722,6 +797,25 @@ class _CounterPageState extends State<CounterPage> {
                 onTap: () {
                   Navigator.pop(context);
                   _openSosCravingDialog();
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.history_edu_rounded, color: Color(0xFFFB7185), size: 20),
+                title: const Text(
+                  "Jurnal Pofte & Recidive",
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  "Orele salvate în baza de date & tipare AI",
+                  style: TextStyle(color: Color(0xFF71717A), fontSize: 11),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => const CravingRelapseHistoryDialog(),
+                  );
                 },
               ),
 
@@ -903,7 +997,11 @@ class _CounterPageState extends State<CounterPage> {
                               timeElapsed: Duration(seconds: _secundeScurse),
                               cigarettesAvoided: _tigariEvitate,
                               moneySaved: _baniEconomisiti,
+                              dailyCost: _dailyCost,
+                              selectedGoal: _selectedGoal,
+                              refreshTrigger: _aiAdviceRefreshCount,
                               onConfigureRoutine: _editSmokingHabits,
+                              onOpenSos: _openSosCravingDialog,
                             ),
                           ),
                   ),
@@ -960,6 +1058,7 @@ class _CounterPageState extends State<CounterPage> {
             await prefs.remove('selected_goal');
             setState(() {
               _selectedGoal = null;
+              _aiAdviceRefreshCount++;
             });
           } else if (result != null && result is Goal) {
             final user = authServices.value.currentUser;
@@ -970,6 +1069,7 @@ class _CounterPageState extends State<CounterPage> {
             await prefs.setString('selected_goal', jsonEncode(result.toMap()));
             setState(() {
               _selectedGoal = result;
+              _aiAdviceRefreshCount++;
             });
           }
         },
@@ -1016,6 +1116,7 @@ class _CounterPageState extends State<CounterPage> {
               await prefs.setString('selected_goal', jsonEncode(result.toMap()));
               setState(() {
                 _selectedGoal = result;
+                _aiAdviceRefreshCount++;
               });
             }
           },
@@ -1337,7 +1438,7 @@ class _CounterPageState extends State<CounterPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Urgență poftă (SOS)",
+                        "Ai o poftă? Înregistrează și Respiră (SOS)",
                         style: TextStyle(
                           color: Color(0xFFFAFAFA),
                           fontSize: 13.5,
@@ -1347,7 +1448,7 @@ class _CounterPageState extends State<CounterPage> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        "Ghid de respirație și recalibrare mentală",
+                        "Scrie de ce ai poftă și calmează impulsul în 3 minute",
                         style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 11.5),
                       ),
                     ],

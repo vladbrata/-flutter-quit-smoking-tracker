@@ -7,11 +7,23 @@ ValueNotifier<AuthServices> authServices = ValueNotifier<AuthServices>(
 );
 
 class AuthServices {
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
 
-  User? get currentUser => firebaseAuth.currentUser;
+  User? get currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
 
-  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+  Stream<User?> get authStateChanges {
+    try {
+      return FirebaseAuth.instance.authStateChanges();
+    } catch (_) {
+      return const Stream.empty();
+    }
+  }
 
   Future<UserCredential> signIn({
     required String email,

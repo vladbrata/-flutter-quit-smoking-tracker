@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_quit_smoking/pages/models/breathing_session_model.dart';
+import 'package:flutter_quit_smoking/pages/models/goal_model.dart';
+import 'package:flutter_quit_smoking/services/auth_services.dart';
+import 'package:flutter_quit_smoking/services/database_service.dart';
 import 'package:flutter_quit_smoking/services/gemini_service.dart';
 
 enum BreathingTechnique {
@@ -20,6 +24,10 @@ class SosCravingDialog extends StatefulWidget {
   final double? moneySaved;
   final String? smokingRoutine;
   final String? nextMilestone;
+  final Goal? selectedGoal;
+  final double? dailyCost;
+  final String? cravingId;
+  final VoidCallback? onSessionFinished;
 
   const SosCravingDialog({
     super.key,
@@ -28,6 +36,10 @@ class SosCravingDialog extends StatefulWidget {
     this.moneySaved,
     this.smokingRoutine,
     this.nextMilestone,
+    this.selectedGoal,
+    this.dailyCost,
+    this.cravingId,
+    this.onSessionFinished,
   });
 
   @override
@@ -50,6 +62,14 @@ class _SosCravingDialogState extends State<SosCravingDialog>
   bool _isCompleted = false;
   bool _isPaused = false;
 
+  // Variabile pentru urmărirea interacțiunii detaliate cu sistemul de respirație
+  late final DateTime _sessionStartTime;
+  late final String _sessionId;
+  int _pauseCount = 0;
+  bool _switchedTechnique = false;
+  int _tipsClickedCount = 0;
+  bool _hasSavedSession = false;
+
   List<String> _cravingTips = [
     "Un craving fizic intens atinge vârful în circa 3 minute, după care scade treptat.",
     "Bea un pahar plin cu apă rece. Îți resetează atenția și hidratează corpul.",
@@ -62,6 +82,9 @@ class _SosCravingDialogState extends State<SosCravingDialog>
   @override
   void initState() {
     super.initState();
+    _sessionStartTime = DateTime.now();
+    _sessionId = _sessionStartTime.millisecondsSinceEpoch.toString();
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -75,14 +98,57 @@ class _SosCravingDialogState extends State<SosCravingDialog>
     _loadPersonalizedTips();
   }
 
+  void _recordSession({required String status}) {
+    if (_hasSavedSession) return;
+    _hasSavedSession = true;
+
+    final now = DateTime.now();
+    final duration = now.difference(_sessionStartTime).inSeconds;
+    final int completedCycles = status == 'completed'
+        ? _targetCycles
+        : (_currentCycle - 1).clamp(0, _targetCycles);
+
+    final session = BreathingSession(
+      id: _sessionId,
+      startedAt: _sessionStartTime,
+      endedAt: now,
+      durationSeconds: duration > 0 ? duration : 1,
+      technique: _technique == BreathingTechnique.boxBreathing
+          ? 'boxBreathing'
+          : 'relax478',
+      switchedTechnique: _switchedTechnique,
+      completedCycles: completedCycles,
+      targetCycles: _targetCycles,
+      pauseCount: _pauseCount,
+      tipsViewedCount: _tipsClickedCount,
+      completionStatus: status,
+    );
+
+    final user = authServices.value.currentUser;
+    databaseService.saveBreathingSession(uid: user?.uid, session: session);
+    if (widget.cravingId != null && (status == 'overcame_craving' || status == 'completed')) {
+      databaseService.markCravingOvercame(
+        uid: user?.uid,
+        cravingId: widget.cravingId!,
+        breathingSessionId: _sessionId,
+      );
+    }
+    widget.onSessionFinished?.call();
+  }
+
   void _loadPersonalizedTips() async {
     try {
+      final user = authServices.value.currentUser;
+      final relapseSummary = await databaseService.getRelapseSummary(uid: user?.uid);
       final tips = await geminiService.getCravingTips(
         timeElapsed: widget.timeElapsed ?? Duration.zero,
         cigarettesAvoided: widget.cigarettesAvoided ?? 0,
         moneySaved: widget.moneySaved ?? 0.0,
         routine: widget.smokingRoutine ?? '',
         nextMilestone: widget.nextMilestone ?? '',
+        selectedGoal: widget.selectedGoal,
+        dailyCost: widget.dailyCost ?? 0.0,
+        relapseSummary: relapseSummary,
       );
       if (mounted && tips.isNotEmpty) {
         setState(() {
@@ -96,6 +162,11 @@ class _SosCravingDialogState extends State<SosCravingDialog>
 
   @override
   void dispose() {
+    if (!_hasSavedSession) {
+      _recordSession(
+        status: _currentCycle > 1 ? 'completed' : 'interrupted',
+      );
+    }
     _phaseTimer?.cancel();
     _animController.dispose();
     super.dispose();
@@ -195,6 +266,7 @@ class _SosCravingDialogState extends State<SosCravingDialog>
 
     if (nextCycle > _targetCycles) {
       _phaseTimer?.cancel();
+      _recordSession(status: 'completed');
       setState(() {
         _isCompleted = true;
       });
@@ -211,12 +283,16 @@ class _SosCravingDialogState extends State<SosCravingDialog>
     if (_technique == technique) return;
     setState(() {
       _technique = technique;
+      _switchedTechnique = true;
       _currentCycle = 1;
     });
     _startPhase(BreathingPhase.inhale);
   }
 
   void _togglePause() {
+    if (!_isPaused) {
+      _pauseCount++;
+    }
     setState(() {
       _isPaused = !_isPaused;
       if (_isPaused) {
@@ -272,8 +348,17 @@ class _SosCravingDialogState extends State<SosCravingDialog>
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop && !_hasSavedSession) {
+          _recordSession(
+            status: _currentCycle > 1 ? 'completed' : 'interrupted',
+          );
+        }
+      },
+      child: Dialog(
+        backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Center(
         child: ConstrainedBox(
@@ -304,6 +389,7 @@ class _SosCravingDialogState extends State<SosCravingDialog>
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -519,6 +605,7 @@ class _SosCravingDialogState extends State<SosCravingDialog>
         // Card cu sfat anti-craving / personalizat AI
         GestureDetector(
           onTap: () {
+            _tipsClickedCount++;
             if (_cravingTips.length > 1) {
               setState(() {
                 _currentTipIndex = (_currentTipIndex + 1) % _cravingTips.length;
@@ -635,6 +722,7 @@ class _SosCravingDialogState extends State<SosCravingDialog>
               flex: 2,
               child: ElevatedButton(
                 onPressed: () {
+                  _recordSession(status: 'overcame_craving');
                   setState(() {
                     _isCompleted = true;
                   });

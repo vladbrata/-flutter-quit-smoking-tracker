@@ -17,7 +17,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: AiRoutineAdviceCard(
-              routine: "Dimineața la cafea",
+              routine: "",
               timeElapsed: Duration(days: 1),
               cigarettesAvoided: 20,
               moneySaved: 25.0,
@@ -26,12 +26,14 @@ void main() {
         ),
       );
 
-      // Inițial sau imediat după primul frame
-      await tester.pumpAndSettle();
+      // Permite execuția primului frame și apelul asincron de încărcare a sfatului
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(AiRoutineAdviceCard), findsOneWidget);
-      expect(find.text("GHIDUL TĂU ZILNIC (AI)"), findsOneWidget);
+      expect(find.text("ANALIZĂ ȘI GHID AI PERSONALIZAT"), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });
 
     testWidgets('renders SkeletonAiAdviceCard with shimmer placeholder', (tester) async {
