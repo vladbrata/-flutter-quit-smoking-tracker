@@ -180,7 +180,7 @@ class CombinedRiskPrediction {
   static const CombinedRiskPrediction safe = CombinedRiskPrediction(
     isAtRisk: false,
     riskType: RiskType.none,
-    alertTitle: 'GHIDUL TĂU ZILNIC (AI)',
+    alertTitle: 'Ghid zilnic',
     riskReason: '',
   );
 
@@ -199,8 +199,8 @@ class CombinedRiskPrediction {
         return CombinedRiskPrediction(
           isAtRisk: true,
           riskType: RiskType.recentRelapse48h,
-          alertTitle: 'ALERTA AI: FEREASTRĂ CRITICĂ POST-RECIDIVĂ',
-          riskReason: 'Primele 48h de la ultima recidivă (${diffHours}h trecute, declanșator: ${lastR.triggerDisplayName}). Vigilență maximă!',
+          alertTitle: 'Fereastră vulnerabilă',
+          riskReason: 'Au trecut ${diffHours}h de la ultima recidivă (${lastR.triggerDisplayName}). Menține atenția sporită.',
           relevantPastReasons: lastR.notes.isNotEmpty ? [lastR.notes] : [],
           peakHour: lastR.hourOfDay,
         );
@@ -216,8 +216,8 @@ class CombinedRiskPrediction {
           return CombinedRiskPrediction(
             isAtRisk: true,
             riskType: RiskType.relapseProximity,
-            alertTitle: 'ALERTA AI: PERICOL DE RECIDIVĂ',
-            riskReason: 'Ora curentă este apropiată de momentul în care ai recidivat anterior ($hourStr - ${r.triggerDisplayName}).',
+            alertTitle: 'Risc de recidivă',
+            riskReason: 'În jurul orei $hourStr ai cedat anterior (${r.triggerDisplayName}).',
             relevantPastReasons: r.notes.isNotEmpty ? [r.notes] : [],
             peakHour: r.hourOfDay,
           );
@@ -230,7 +230,6 @@ class CombinedRiskPrediction {
       for (final peak in cravingSummary.peakHours) {
         final diff = (now.hour - peak).abs();
         if (diff <= 1 || diff >= 23) {
-          // Găsește motivele notate în acest interval de ore
           final matchingReasons = cravingSummary.history
               .where((c) => (c.hourOfDay - peak).abs() <= 1 && c.reason.trim().isNotEmpty)
               .map((c) => c.reason.trim())
@@ -239,14 +238,14 @@ class CombinedRiskPrediction {
 
           final peakStr = "${peak.toString().padLeft(2, '0')}:00";
           final reasonSnippet = matchingReasons.isNotEmpty
-              ? " (ai menționat anterior: \"${matchingReasons.first}\")"
+              ? " (notat: \"${matchingReasons.first}\")"
               : "";
 
           return CombinedRiskPrediction(
             isAtRisk: true,
             riskType: RiskType.cravingPrediction,
-            alertTitle: 'AI PREVENTIV: MOMENT CRITIC ANTICIPAT',
-            riskReason: 'AI-ul prezice risc de poftă: intervalul $peakStr coincide cu poftele tale frecvente$reasonSnippet.',
+            alertTitle: 'Predispoziție la poftă',
+            riskReason: 'În jurul orei $peakStr apar de obicei pofte$reasonSnippet.',
             relevantPastReasons: matchingReasons,
             peakHour: peak,
           );
@@ -263,20 +262,20 @@ class CombinedRiskPrediction {
 
       if ((rLower.contains('cafea') || rLower.contains('dimine')) && (h >= 6 && h <= 10)) {
         routineMatches = true;
-        matchText = 'Rutina ta de dimineață la cafea este activă acum.';
+        matchText = 'Intervalul asociat cafelei de dimineață.';
       } else if (rLower.contains('pranz') && (h >= 12 && h <= 14)) {
         routineMatches = true;
-        matchText = 'Intervalul prânzului coincide cu momentele declarate în rutină.';
+        matchText = 'Intervalul asociat pauzei de prânz.';
       } else if ((rLower.contains('seara') || rLower.contains('noapte')) && (h >= 19 && h <= 23)) {
         routineMatches = true;
-        matchText = 'Rutina ta de seară/relaxare este activă acum.';
+        matchText = 'Intervalul asociat relaxării de seară.';
       }
 
       if (routineMatches) {
         return CombinedRiskPrediction(
           isAtRisk: true,
           riskType: RiskType.routineMatch,
-          alertTitle: 'AI PREVENTIV: CONTEXT VULNERABIL (RUTINĂ)',
+          alertTitle: 'Rutină activă',
           riskReason: matchText,
           relevantPastReasons: [routine],
           peakHour: h,

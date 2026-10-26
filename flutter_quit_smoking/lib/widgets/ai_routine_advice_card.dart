@@ -40,7 +40,6 @@ class AiRoutineAdviceCard extends StatefulWidget {
 class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
   String? _adviceText;
   bool _isLoading = true;
-  String _currentTimeLabel = '';
   BreathingSummary? _breathingSummary;
   RelapseSummary? _relapseSummary;
   CravingSummary? _cravingSummary;
@@ -50,7 +49,6 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
   @override
   void initState() {
     super.initState();
-    _currentTimeLabel = geminiService.getTimeOfDayLabel(DateTime.now());
     _loadAdvice(forceRefresh: false);
 
     // Actualizare automată periodică la fiecare 10 minute pentru sfaturi dinamice pe parcursul zilei
@@ -81,7 +79,6 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
-      _currentTimeLabel = geminiService.getTimeOfDayLabel(DateTime.now());
     });
 
     final user = authServices.value.currentUser;
@@ -144,183 +141,105 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
                 _adviceText!.toLowerCase().contains('critic') ||
                 _adviceText!.toLowerCase().contains('pericol')));
 
-    String badgeText = _currentTimeLabel;
-    IconData? badgeIcon;
-    if (pred.isAtRisk) {
-      switch (pred.riskType) {
-        case RiskType.cravingPrediction:
-          badgeText = "POFTĂ ANTICIPATĂ";
-          badgeIcon = Icons.psychology_rounded;
-          break;
-        case RiskType.relapseProximity:
-        case RiskType.recentRelapse48h:
-          badgeText = "RISC RECIDIVĂ";
-          badgeIcon = Icons.warning_amber_rounded;
-          break;
-        case RiskType.routineMatch:
-          badgeText = "RUTINĂ ACTIVĂ";
-          badgeIcon = Icons.schedule_rounded;
-          break;
-        case RiskType.none:
-          badgeText = _currentTimeLabel;
-          break;
-      }
-    }
+    final String timeSlotLabel = geminiService.getTimeOfDayLabel(now);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isRelapseRisk ? const Color(0xFF1E0E14) : const Color(0xFF121215),
-        gradient: isRelapseRisk
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF2E1019),
-                  Color(0xFF190910),
-                ],
-              )
-            : null,
+        color: isRelapseRisk ? const Color(0xFF191114) : const Color(0xFF141417),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isRelapseRisk
-              ? const Color(0xFFFB7185).withValues(alpha: 0.65)
-              : Colors.white.withValues(alpha: 0.07),
-          width: isRelapseRisk ? 1.6 : 1.0,
+              ? const Color(0xFFFB7185).withValues(alpha: 0.35)
+              : Colors.white.withValues(alpha: 0.08),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: isRelapseRisk
-                ? const Color(0xFFE11D48).withValues(alpha: 0.30)
-                : Colors.black.withValues(alpha: 0.35),
-            blurRadius: isRelapseRisk ? 22 : 12,
-            spreadRadius: isRelapseRisk ? 1.2 : 0,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Iconiță + Titlu + Badge Momentul Zilei / Risc + Refresh
+          // Header: Status Badge (stânga) + Butoane compacte (dreapta)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isRelapseRisk
+                      ? const Color(0xFFE11D48).withValues(alpha: 0.15)
+                      : Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isRelapseRisk
+                        ? const Color(0xFFFB7185).withValues(alpha: 0.35)
+                        : Colors.white.withValues(alpha: 0.08),
+                    width: 0.8,
+                  ),
+                ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: isRelapseRisk
-                            ? const Color(0xFFE11D48).withValues(alpha: 0.22)
-                            : Colors.white.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(6),
-                        border: isRelapseRisk
-                            ? Border.all(
-                                color: const Color(0xFFFB7185).withValues(alpha: 0.40),
-                                width: 0.8,
-                              )
-                            : null,
-                      ),
-                      child: Icon(
-                        isRelapseRisk ? Icons.shield_rounded : Icons.auto_awesome_rounded,
-                        color: isRelapseRisk ? const Color(0xFFFB7185) : const Color(0xFFD4D4D8),
-                        size: 13,
-                      ),
+                    Icon(
+                      isRelapseRisk ? Icons.shield_rounded : Icons.auto_awesome_rounded,
+                      size: 13,
+                      color: isRelapseRisk ? const Color(0xFFFB7185) : const Color(0xFFA1A1AA),
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        isRelapseRisk
-                            ? pred.alertTitle
-                            : "ANALIZĂ ȘI GHID AI PERSONALIZAT",
-                        style: TextStyle(
-                          color: isRelapseRisk ? const Color(0xFFFDA4AF) : const Color(0xFFA1A1AA),
-                          fontSize: 10.5,
-                          fontWeight: isRelapseRisk ? FontWeight.w700 : FontWeight.w600,
-                          letterSpacing: 0.8,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(width: 6),
+                    Text(
+                      isRelapseRisk ? pred.alertTitle : "${pred.alertTitle} • $timeSlotLabel",
+                      style: TextStyle(
+                        color: isRelapseRisk ? const Color(0xFFFDA4AF) : const Color(0xFFD4D4D8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ],
                 ),
               ),
+
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isRelapseRisk ? 9 : 8,
-                      vertical: isRelapseRisk ? 3.5 : 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isRelapseRisk
-                          ? const Color(0xFFE11D48).withValues(alpha: 0.28)
-                          : Colors.white.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isRelapseRisk
-                            ? const Color(0xFFFB7185).withValues(alpha: 0.50)
-                            : Colors.white.withValues(alpha: 0.07),
-                      ),
-                    ),
-                    child: isRelapseRisk
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                badgeIcon ?? Icons.warning_amber_rounded,
-                                size: 11,
-                                color: const Color(0xFFFECDD3),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                badgeText,
-                                style: const TextStyle(
-                                  color: Color(0xFFFECDD3),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ],
-                          )
-                        : Text(
-                            _currentTimeLabel,
-                            style: const TextStyle(
-                              color: Color(0xFFD4D4D8),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                  IconButton(
+                    icon: const Icon(Icons.history_edu_rounded, size: 17),
+                    color: const Color(0xFFA1A1AA),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => const CravingRelapseHistoryDialog(),
+                      );
+                    },
+                    tooltip: "Jurnal pofte & recidive",
+                    padding: const EdgeInsets.all(5),
+                    constraints: const BoxConstraints(),
                   ),
                   const SizedBox(width: 4),
                   IconButton(
                     icon: _isLoading
-                        ? SizedBox(
-                            width: 13,
-                            height: 13,
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
                             child: CircularProgressIndicator(
                               strokeWidth: 1.8,
-                              color: isRelapseRisk
-                                  ? const Color(0xFFFB7185)
-                                  : const Color(0xFFA1A1AA),
+                              color: Color(0xFFA1A1AA),
                             ),
                           )
-                        : Icon(
-                            Icons.refresh_rounded,
-                            size: 16,
-                            color: isRelapseRisk
-                                ? const Color(0xFFFDA4AF)
-                                : const Color(0xFF71717A),
-                          ),
+                        : const Icon(Icons.refresh_rounded, size: 17),
+                    color: const Color(0xFFA1A1AA),
                     onPressed: _isLoading ? null : () => _loadAdvice(forceRefresh: true),
                     tooltip: "Generează alt sfat",
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(5),
                     constraints: const BoxConstraints(),
                   ),
                 ],
@@ -328,267 +247,114 @@ class _AiRoutineAdviceCardState extends State<AiRoutineAdviceCard> {
             ],
           ),
 
-          const SizedBox(height: 12),
-
-          // Banner de alertă de risc dacă AI-ul a detectat o situație similară cu un relapse trecut sau o poftă anticipată
-          if (pred.isAtRisk && pred.riskReason.isNotEmpty) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-              decoration: BoxDecoration(
-                color: const Color(0xFF000000).withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFFFB7185).withValues(alpha: 0.40),
-                  width: 1.0,
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    pred.riskType == RiskType.cravingPrediction
-                        ? Icons.psychology_rounded
-                        : Icons.shield_outlined,
-                    size: 16,
-                    color: const Color(0xFFFB7185),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          pred.alertTitle,
-                          style: const TextStyle(
-                            color: Color(0xFFFB7185),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "${pred.riskReason} AI-ul te sfătuiește să aplici măsuri preventive acum.",
-                          style: const TextStyle(
-                            color: Color(0xFFFEE2E2),
-                            fontSize: 11,
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          // Context de risc (dacă este detectat): linie simplă și clară, fără cutii înghesuite
+          if (isRelapseRisk && pred.riskReason.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              pred.riskReason,
+              style: const TextStyle(
+                color: Color(0xFFFB7185),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
               ),
             ),
           ],
 
-          // Conținut sfat sau skeleton loader inline
+          const SizedBox(height: 12),
+
+          // Sfatul propriu-zis: spațiere aerisită, tipografie curată, fără chenare duble
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 240),
+            duration: const Duration(milliseconds: 200),
             child: _isLoading && _adviceText == null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 11,
+                        height: 12,
                         width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 7),
+                        margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: isRelapseRisk
-                              ? const Color(0xFF381520)
-                              : const Color(0xFF1C1C22),
-                          borderRadius: BorderRadius.circular(3),
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                       Container(
-                        height: 11,
-                        width: 220,
+                        height: 12,
+                        width: 180,
                         decoration: BoxDecoration(
-                          color: isRelapseRisk
-                              ? const Color(0xFF381520)
-                              : const Color(0xFF1C1C22),
-                          borderRadius: BorderRadius.circular(3),
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ],
                   )
-                : isRelapseRisk
-                    ? Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE11D48).withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(12),
-                          border: const Border(
-                            left: BorderSide(
-                              color: Color(0xFFFB7185),
-                              width: 3.5,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          _adviceText ?? "Respiră adânc și rămâi concentrat pe progresul tău.",
-                          key: ValueKey<String>(_adviceText ?? ''),
-                          style: const TextStyle(
-                            color: Color(0xFFFFF1F2),
-                            fontSize: 13.5,
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.1,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        _adviceText ?? "Respiră adânc și rămâi concentrat pe progresul tău.",
-                        key: ValueKey<String>(_adviceText ?? ''),
-                        style: const TextStyle(
-                          color: Color(0xFFFAFAFA),
-                          fontSize: 13.5,
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.1,
-                        ),
-                      ),
+                : Text(
+                    _adviceText ?? "Rămâi concentrat pe progresul tău de astăzi.",
+                    key: ValueKey<String>(_adviceText ?? ''),
+                    style: TextStyle(
+                      color: isRelapseRisk ? const Color(0xFFFFF1F2) : const Color(0xFFFAFAFA),
+                      fontSize: 13.5,
+                      height: 1.55,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
           ),
 
-          // Buton de acțiune rapidă în caz de risc de recidivă (deschide respirația ghidată)
+          // Buton de acțiune rapidă în caz de risc (simplu, proporționat)
           if (isRelapseRisk && widget.onOpenSos != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: widget.onOpenSos,
-                icon: const Icon(Icons.air_rounded, size: 15, color: Colors.white),
+                icon: const Icon(Icons.air_rounded, size: 15, color: Color(0xFFFDA4AF)),
                 label: const Text(
-                  "Dezamorsează impulsul acum (Respirație SOS)",
+                  "Exercițiu de respirație (2 min)",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFDA4AF),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE11D48),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                  side: BorderSide(
+                    color: const Color(0xFFFB7185).withValues(alpha: 0.35),
+                    width: 1,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
             ),
           ],
 
-          // Indicator sesiune respirație integrată în AI
+          // Metadata discretă în footer
           if (_breathingSummary != null && _breathingSummary!.lastSession != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isRelapseRisk
-                    ? const Color(0xFF240E16)
-                    : const Color(0xFF16161A),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isRelapseRisk
-                      ? const Color(0xFFFB7185).withValues(alpha: 0.20)
-                      : Colors.white.withValues(alpha: 0.05),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.air_rounded,
-                    size: 13,
-                    color: isRelapseRisk ? const Color(0xFFFB7185) : const Color(0xFF2DD4BF),
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      "Respirație analizată de AI: ${_breathingSummary!.totalSessionsToday > 0 ? '${_breathingSummary!.totalSessionsToday} sesiuni azi' : '${_breathingSummary!.totalSessions} sesiuni'} (ultima la ${_breathingSummary!.lastSession!.formattedStartTime} - ${_breathingSummary!.lastSession!.techniqueDisplayName})",
-                      style: TextStyle(
-                        color: isRelapseRisk ? const Color(0xFFFDA4AF) : const Color(0xFFA1A1AA),
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 10),
+            Text(
+              "Respirație: ${_breathingSummary!.totalSessionsToday > 0 ? '${_breathingSummary!.totalSessionsToday} sesiuni azi' : '${_breathingSummary!.totalSessions} sesiuni'} • ultima la ${_breathingSummary!.lastSession!.formattedStartTime}",
+              style: const TextStyle(
+                color: Color(0xFF71717A),
+                fontSize: 11,
               ),
             ),
           ],
 
-          // Link direct către Jurnalul de Pofte & Recidive
-          const SizedBox(height: 12),
-          InkWell(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => const CravingRelapseHistoryDialog(),
-              );
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.history_edu_rounded,
-                    size: 14,
-                    color: isRelapseRisk
-                        ? const Color(0xFFFDA4AF)
-                        : const Color(0xFFA1A1AA),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      "Vezi Jurnalul de pofte & ore de risc (${_cravingSummary?.totalCravings ?? 0} pofte / ${_relapseSummary?.totalRelapses ?? 0} recidive)",
-                      style: TextStyle(
-                        color: isRelapseRisk
-                            ? const Color(0xFFFDA4AF)
-                            : const Color(0xFFA1A1AA),
-                        fontSize: 11,
-                        decoration: TextDecoration.underline,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 11,
-                    color: isRelapseRisk
-                        ? const Color(0xFFFDA4AF)
-                        : const Color(0xFF71717A),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Opțiune configurare obiceiuri dacă nu a setat încă
           if (widget.routine.trim().isEmpty && widget.onConfigureRoutine != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: widget.onConfigureRoutine,
-              child: Row(
-                children: const [
-                  Icon(Icons.edit_note_rounded, size: 15, color: Color(0xFFA1A1AA)),
-                  SizedBox(width: 6),
-                  Text(
-                    "Configurează când fumezi pentru sfaturi precise",
-                    style: TextStyle(
-                      color: Color(0xFFA1A1AA),
-                      fontSize: 11.5,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
+              child: const Text(
+                "Configurează când fumezi de obicei",
+                style: TextStyle(
+                  color: Color(0xFF71717A),
+                  fontSize: 11,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ],

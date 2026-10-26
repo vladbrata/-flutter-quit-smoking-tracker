@@ -204,17 +204,13 @@ class GeminiService {
         }
 
         promptBuffer.writeln("""
-CERINȚE PENTRU RĂSPUNS:
-1. Formulează un singur mesaj concentrat (2-3 propoziții, 40-60 de cuvinte), direct, viu, empatic și extrem de personalizat în limba română la persoana a II-a ('tu').
-2. DACĂ EXISTĂ O PREDICȚIE DE RISC SAU POFTĂ (${prediction.isAtRisk ? prediction.riskReason : 'fără risc iminent'}):
-   - Fii un scut proactiv! Avertizează-l că se află în intervalul sau contextul vulnerabil.
-   - Folosește subtil și inteligent chiar motivele sau cuvintele scrise de el în trecut (ex: dacă a menționat 'cafea cu colegii' sau 'stres la prânz', fă referire directă la acel moment).
-   - Dă-i o alternativă practică imediată de a trece peste impuls (ex: bea apă rece, respiră adânc 2 minute, schimbă mediul fizic).
-3. DACĂ NU EXISTĂ RISC IMINENT:
-   - Oferă un sfat proaspăt potrivit momentului zilei ($timeLabel) și progresului său.
-4. DACĂ ARE OBIECTIV FINANCIAR ACTIV:
-   - Menționează-l pe nume ('${selectedGoal?.name ?? ''}') cu căldură și arată-i cum fiecare clipă de rezistență îl aduce mai aproape de realizarea lui.
-5. FĂRĂ CLIȘEE: Nu folosi generalități impersonale, fără introduceri ca 'Iată sfatul tău:' sau ghilimele exterioare. Schimbă formulările pentru a fi mereu surprinzător și motivant.
+REGULI STRICTE DE COMUNICARE (FĂRĂ AI SLOP):
+- Ton: Calm, direct, matur, empatic și realist. FĂRĂ CLIȘEE CORPORATISTE, FĂRĂ DRAMATISM (interzis: 'fii un scut', 'luptă', 'recompensa visată', 'capcană', 'dopamină', 'scrum', 'pilot automat', 'eroe', 'dezamorsează').
+- Lungime: Exact 2 propoziții scurte (maximum 30-40 de cuvinte). Fără ghilimele, fără introduceri.
+- Conținut:
+  * Dacă există risc sau poftă anticipată (${prediction.isAtRisk ? prediction.riskReason : 'fără risc iminent'}): Menționează simplu contextul și oferă o acțiune fizică imediată (apă rece, ieși la aer, respiră adânc 1 minut).
+  * Dacă are obiectiv financiar: Menționează-l natural pe '${selectedGoal?.name ?? ''}' doar dacă se leagă firesc de propoziție.
+  * Altfel: Un gând simplu, practic și liniștitor adaptat momentului zilei ($timeLabel).
 """);
 
         final response = await model.generateContent([Content.text(promptBuffer.toString())]);
@@ -362,14 +358,14 @@ Scrie în română, persoana a II-a, fără introduceri.
     // 0. Dacă există o predicție de risc sau poftă anticipată:
     if (pred.isAtRisk) {
       final reasonSnippet = pred.relevantPastReasons.isNotEmpty
-          ? " (notat anterior: \"${pred.relevantPastReasons.first}\")"
+          ? " (${pred.relevantPastReasons.first})"
           : "";
 
       final riskTemplates = [
-        "🛡️ AI Preventiv: Te afli într-un interval vulnerabil$reasonSnippet. Bea un pahar plin cu apă rece și fă 2 minute de respirație ghidată înainte să apară impulsul!",
-        "⚠️ Atenție la tiparul tău: În trecut, această oră a generat pofte sau dificultăți$reasonSnippet. Nu lăsa pilotul automat să decidă – fă o scurtă pauză activă fără fum!",
-        "🛡️ Alertă de protecție: Recunoaște capcana din timp$reasonSnippet. Fiecare minut de atenție conștientă îți consolidează libertatea și te ține departe de recidivă.",
-        "⚡ Moment critic anticipat de AI: Corpul tău își amintește vechile obiceiuri$reasonSnippet. Schimbă încăperea sau respiră profund în 4 timpi chiar acum!",
+        "În acest interval apar de obicei cele mai mari pofte$reasonSnippet. Bea un pahar cu apă rece și fă o scurtă pauză; impulsul trece în 3 minute.",
+        "Atenție la acest moment al zilei$reasonSnippet. Dacă simți nevoia de o țigară, schimbă încăperea sau ieși la aer înainte să iei o decizie.",
+        "În trecut, această oră a fost mai vulnerabilă$reasonSnippet. Relaxează umerii, respiră adânc de câteva ori și lasă valul să treacă de la sine.",
+        "Este un moment sensibil pe baza tiparelor tale$reasonSnippet. Fă un scurt exercițiu de respirație dacă simți tensiune acumulată.",
       ];
       return riskTemplates[refreshSeed % riskTemplates.length];
     }
@@ -378,62 +374,47 @@ Scrie în română, persoana a II-a, fără introduceri.
     String goalSnippet = "";
     if (selectedGoal != null) {
       final pct = selectedGoal.calculatePercentage(moneySaved);
-      final remaining = selectedGoal.remainingRon(moneySaved);
       if (pct >= 100) {
-        goalSnippet = " 🎯 Ai atins 100% din '${selectedGoal.name}'! Mergi și bucură-te de recompensa ta fără fum.";
-      } else if (pct >= 50) {
-        goalSnippet = " Ești la $pct% din '${selectedGoal.name}' – mai ai doar ${remaining.toStringAsFixed(0)} RON până la visul tău!";
+        goalSnippet = " Ai atins 100% din '${selectedGoal.name}'.";
       } else {
-        goalSnippet = " Fiecare zi fără fum te apropie de '${selectedGoal.name}', unde ai strâns deja $pct%.";
+        goalSnippet = " Ai economisit deja $pct% din '${selectedGoal.name}'.";
       }
     }
 
-    // 2. Fragment Respirație recentă
-    String breathingSnippet = "";
-    if (breathingSummary != null && breathingSummary.lastSession != null) {
-      final last = breathingSummary.lastSession!;
-      final isToday = last.startedAt.year == now.year &&
-          last.startedAt.month == now.month &&
-          last.startedAt.day == now.day;
-      if (isToday) {
-        breathingSnippet = " Ai calmat excelent pofta mai devreme la ${last.formattedStartTime} prin ${last.techniqueDisplayName}.";
-      }
-    }
-
-    // 3. Pool variat de mesaje dinamice pe intervale orare (rotite cu refreshSeed)
+    // 2. Pool variat de mesaje dinamice pe intervale orare (rotite cu refreshSeed)
     if (hour >= 5 && hour < 11) {
       final morningTemplates = [
-        "Dimineața creierul tău cere doar dopamina obișnuită. Începe ziua bucurându-te de plămânii curați și aerul proaspăt fără nicotină.",
-        "E timpul cafelei. Înlocuiește gestul mecanic al țigării cu 3 respirații lente și savurează aroma autentică a băuturii.",
-        "Un nou început de zi fără fumat! Cele $cigarettesAvoided țigări evitate până acum îți dau energie reală pentru întreaga zi.",
+        "La cafea, nevoia de a fuma este doar o obișnuință a mâinilor. Savurează gustul cafelei fără grabă.$goalSnippet",
+        "Primele ore ale dimineții sunt mai ușoare dacă bei un pahar mare de apă înainte de orice activitate.$goalSnippet",
+        "Rutina de dimineață se așază mai bine fără fum. Ai deja $cigarettesAvoided țigări evitate.$goalSnippet",
       ];
       if (lowerRoutine.contains('cafea') || lowerRoutine.contains('diminea')) {
-        return "E timpul cafelei de dimineață. Înlocuiește gestul țigării cu un pahar rece de apă și 3 respirații lente.$breathingSnippet$goalSnippet";
+        return "E timpul cafelei. Înlocuiește gestul țigării cu un pahar rece de apă și 3 respirații lente.$goalSnippet";
       }
-      return "${morningTemplates[refreshSeed % morningTemplates.length]}$breathingSnippet$goalSnippet";
+      return morningTemplates[refreshSeed % morningTemplates.length];
     } else if (hour >= 11 && hour < 15) {
       final lunchTemplates = [
-        "După masă, pofta de nicotină durează doar 3 minute. Bea o gură mare de apă rece sau fă o scurtă plimbare pentru a rupe asocierea reflexă.",
-        "Pauza de prânz este pentru reîncărcare, nu pentru fumat. Conștientizează cele $cigarettesAvoided țigări evitate și cele ${moneySaved.toStringAsFixed(0)} RON economisiți!",
-        "Masa de prânz se așază mult mai bine când nu este urmată de fum. Ridică-te de la masă imediat și schimbă peisajul.",
+        "După prânz, impulsul mecanic scade în câteva minute dacă te ridici direct de la masă și faci câțiva pași.$goalSnippet",
+        "Pauza de prânz este pentru odihnă și hrană bună. Bea un ceai cald sau un pahar cu apă.$goalSnippet",
+        "Masa de prânz este completă fără țigară. Ai economisit deja ${moneySaved.toStringAsFixed(0)} RON.$goalSnippet",
       ];
-      return "${lunchTemplates[refreshSeed % lunchTemplates.length]}$breathingSnippet$goalSnippet";
+      return lunchTemplates[refreshSeed % lunchTemplates.length];
     } else if (hour >= 15 && hour < 19) {
       final afternoonTemplates = [
-        "Tensiunea de după-amiază se rezolvă cu o pauză reală de respirație, nu cu fumat. Relaxează umerii și expiră prelung.",
-        "După-amiaza este momentul să-ți admiri progresul de ${moneySaved.toStringAsFixed(0)} RON economisiți și claritatea mentală.",
-        "Oboseala de la birou cere oxigen, nu monoxid de carbon. Deschide geamul larg și inspiră adânc de 4 ori.",
+        "Oboseala de după-amiază cere o gură de oxigen. Deschide geamul larg și respiră adânc.$goalSnippet",
+        "Tensiunea de peste zi se eliberează cel mai bine printr-o scurtă plimbare de 5 minute departe de birou.$goalSnippet",
+        "După-amiaza trece mai ușor când bei apă regulat și îți lași privirea să se odihnească câteva clipe.$goalSnippet",
       ];
-      return "${afternoonTemplates[refreshSeed % afternoonTemplates.length]}$breathingSnippet$goalSnippet";
+      return afternoonTemplates[refreshSeed % afternoonTemplates.length];
     } else if (hour >= 19 && hour < 23) {
       final eveningTemplates = [
-        "Seara, relaxarea adevărată vine din deconectare profundă, nu din nicotină. Respiră conștient și lasă corpul să se regenereze.",
-        "O altă zi întreagă fără fumat este o victorie uriașă! Încheie seara mândru de disciplina și sănătatea ta.",
-        "Momentele de liniște de seară sunt magice fără scrum și fum. Meriți această libertate deplină.",
+        "Seara este pentru liniște și deconectare. Respiră calm și bucură-te că ai încheiat o altă zi fără fum.$goalSnippet",
+        "O zi întreagă fără fumat aduce o noapte cu somn odihnitor. Continuă în ritmul tău.$goalSnippet",
+        "Momentele de relaxare de seară sunt mult mai curate fără mirosul de tutun.$goalSnippet",
       ];
-      return "${eveningTemplates[refreshSeed % eveningTemplates.length]}$breathingSnippet$goalSnippet";
+      return eveningTemplates[refreshSeed % eveningTemplates.length];
     } else {
-      return "Noaptea este dedicată odihnei și regenerării celulare. Dacă ai insomnie, bea o cană de apă caldă și concentrează-te pe respirație lentă.$goalSnippet";
+      return "Noaptea corpul se regenerează cel mai bine. Dacă adormi greu, bea o cană de apă caldă și respiră lent.$goalSnippet";
     }
   }
 
@@ -452,32 +433,29 @@ Scrie în română, persoana a II-a, fără introduceri.
     final timeStr = days > 0 ? "$days zile și $hours ore" : "$hours ore";
 
     final list = <String>[
-      "Ai deja $timeStr fără fum și $cigarettesAvoided țigări refuzate. Nu lăsa un impuls de 3 minute să șteargă această victorie!",
+      "Ai deja $timeStr fără fum și $cigarettesAvoided țigări evitate. Pofta fizică scade în intensitate după circa 3 minute dacă nu acționezi pe moment.",
     ];
 
     if (relapseSummary?.lastRelapse != null) {
       list.add(
-        "Amintește-ți că data trecută declanșatorul a fost: \"${relapseSummary!.lastRelapse!.triggerDisplayName}\". Recunoaște capcana acum înainte să acționezi!",
+        "În trecut ai simțit o presiune similară legată de: ${relapseSummary!.lastRelapse!.triggerDisplayName}. Bea o gură mare de apă rece.",
       );
     } else if (selectedGoal != null) {
       final pct = selectedGoal.calculatePercentage(moneySaved);
       final remaining = selectedGoal.remainingRon(moneySaved);
       list.add(
-        "Ai strâns deja ${moneySaved.toStringAsFixed(0)} RON ($pct%) pentru '${selectedGoal.name}'! Mai ai doar ${remaining.toStringAsFixed(0)} RON – nu da foc banilor tăi pentru o secundă de fum.",
+        "Ești la $pct% din '${selectedGoal.name}' (mai ai ${remaining.toStringAsFixed(0)} RON). Păstrează-ți economiile intacte.",
       );
     } else if (nextMilestone.isNotEmpty) {
-      list.add("Corpul tău luptă chiar acum pentru etapa: $nextMilestone. Cravingul trece repede, dar sănătatea recâștigată rămâne!");
+      list.add("Următoarea etapă de sănătate: $nextMilestone. Tentația trece repede, dar recuperarea rămâne.");
     } else {
-      list.add("Ai economisit deja ${moneySaved.toStringAsFixed(1)} RON. Fiecare impuls depășit îți reconfigurează creierul spre libertate.");
+      list.add("Ai economisit deja ${moneySaved.toStringAsFixed(0)} RON. Schimbă mediul fizic sau încăperea pentru 5 minute.");
     }
 
-    final lowerRoutine = routine.toLowerCase();
-    if (lowerRoutine.contains('cafea')) {
-      list.add("Cafeaua are un gust mult mai bogat fără fum. Bea o gură mare de apă rece și continuă respirația în 4 timpi.");
-    } else if (lowerRoutine.contains('stres')) {
-      list.add("Stresul este doar o stare trecătoare, nicotina doar îl adâncește. Expiră prelung pe gură și eliberează maxilarul.");
+    if (routine.toLowerCase().contains('cafea')) {
+      list.add("Savurează băutura fără grabă. Gestul mâinii este doar un reflex care dispare repede.");
     } else {
-      list.add("Inspiră lent pe nas și expiră prelung pe gură. În 3 minute corpul tău va reveni la starea de calm.");
+      list.add("Inspiră lent pe nas și expiră prelung pe gură. Tensiunea musculară din umeri va scădea.");
     }
 
     return list;

@@ -31,7 +31,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(AiRoutineAdviceCard), findsOneWidget);
-      expect(find.text("ANALIZĂ ȘI GHID AI PERSONALIZAT"), findsOneWidget);
+      expect(find.textContaining("Ghid zilnic"), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
       expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });

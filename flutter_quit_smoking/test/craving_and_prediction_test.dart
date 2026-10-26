@@ -76,7 +76,7 @@ void main() {
 
       expect(prediction.isAtRisk, true);
       expect(prediction.riskType, RiskType.cravingPrediction);
-      expect(prediction.alertTitle, 'AI PREVENTIV: MOMENT CRITIC ANTICIPAT');
+      expect(prediction.alertTitle, 'Predispoziție la poftă');
       expect(prediction.riskReason.contains('14:00'), true);
       expect(prediction.relevantPastReasons.contains('Am terminat prânzul și simt poftă puternică'), true);
     });
@@ -112,7 +112,7 @@ void main() {
 
       expect(prediction.isAtRisk, true);
       expect(prediction.riskType, RiskType.relapseProximity);
-      expect(prediction.alertTitle, 'ALERTA AI: PERICOL DE RECIDIVĂ');
+      expect(prediction.alertTitle, 'Risc de recidivă');
       expect(prediction.riskReason.contains('22:00'), true);
     });
   });
